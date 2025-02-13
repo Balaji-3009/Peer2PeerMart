@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx", // Enable JSX support
+    "target": "ES2020", // Target JavaScript version
+    "module": "ESNext", // Use ES modules
+    "moduleResolution": "node", // Resolve modules using Node.js rules
+    "strict": true, // Enable strict type-checking
+    "esModuleInterop": true, // Enable ES module interop
+    "skipLibCheck": true, // Skip library checking
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+    "baseUrl": ".", // Base directory for module resolution
+    "paths": {
+      "@/*": ["./src/*"] // Path aliases
+    }
+  },
+  "include": ["src"], // Include the src directory
+  "exclude": ["node_modules"] // Exclude node_modules
+}
