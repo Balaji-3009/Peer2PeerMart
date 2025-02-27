@@ -37,9 +37,9 @@ export default function ChatWindow({ item, onClose, position }) {
           variant="ghost" 
           size="sm" 
           onClick={onClose} 
-          className="absolute top-2 right-2 hover:bg-purple-700 rounded-full p-1"
+          className="absolute top-2 right-2 hover:bg-purple-700 rounded-full p-1 "
         >
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5 mb-4" />
         </Button>
       </CardHeader>
       <CardContent className="flex-grow overflow-y-auto p-2">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -9,32 +8,39 @@ import {
   CardHeader,
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Trash2, MessageCircle } from "lucide-react";
+import { Trash2, MessageCircle, CheckCircle } from "lucide-react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
-// Dummy wishlist data
-const initialWishlistItems = [
-  { id: 1, name: "Smartphone X", price: 799.99 },
-  { id: 2, name: "Laptop Pro", price: 1299.99 },
-  { id: 3, name: "Wireless Earbuds", price: 149.99 },
+import { useNavigate } from "react-router-dom";
+// Dummy received orders data
+const initialReceivedOrders = [
+  { id: 1, name: "Smartphone X", price: 799.99, buyer: "John Doe" },
+  { id: 2, name: "Laptop Pro", price: 1299.99, buyer: "Jane Smith" },
+  { id: 3, name: "Wireless Earbuds", price: 149.99, buyer: "Bob Johnson" },
 ];
 
-export default function WishlistPage() {
-  const [wishlistItems, setWishlistItems] = useState(initialWishlistItems);
+export default function ReceivedOrders() {
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState(initialReceivedOrders);
   const [chatItem, setChatItem] = useState(null);
   const [chatPosition, setChatPosition] = useState({ top: 0, left: 0 });
-  const navigate = useNavigate();
   const chatButtonRefs = useRef({});
 
-  const removeItem = (id) => {
-    setWishlistItems((items) => items.filter((item) => item.id !== id));
+  const removeOrder = (id) => {
+    setOrders((items) => items.filter((item) => item.id !== id));
+  };
+
+  const markAsSold = (id) => {
+    setOrders((items) =>
+      items.map((item) => (item.id === id ? { ...item, sold: true } : item))
+    );
   };
 
   const toggleChat = (item, event) => {
     const buttonRect = chatButtonRefs.current[item.id].getBoundingClientRect();
     const newPosition = {
       top: buttonRect.top + window.scrollY,
-      left: buttonRect.right + window.scrollX + 10, // 10px offset from the button
+      left: buttonRect.right + window.scrollX + 10,
     };
 
     if (chatItem && chatItem.id === item.id) {
@@ -50,39 +56,51 @@ export default function WishlistPage() {
       <Sidebar />
       <Card className="w-full max-w-4xl overflow-hidden">
         <CardHeader className="bg-purple-600 text-white p-6">
-          <h1 className="text-3xl font-bold">Your Wishlist</h1>
+          <h1 className="text-3xl font-bold">Received Orders</h1>
         </CardHeader>
         <CardContent className="p-6">
-          {wishlistItems.length === 0 ? (
-            <p className="text-gray-600 text-center">Your wishlist is empty.</p>
+          {orders.length === 0 ? (
+            <p className="text-gray-600 text-center">No orders received yet.</p>
           ) : (
             <ul className="divide-y divide-gray-200">
-              {wishlistItems.map((item) => (
+              {orders.map((order) => (
                 <li
-                  key={item.id}
+                  key={order.id}
                   className="py-4 flex items-center justify-between"
                 >
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-800">
-                      {item.name}
+                      {order.name}
                     </h3>
-                    <p className="text-gray-600">${item.price.toFixed(2)}</p>
+                    <p className="text-gray-600">${order.price.toFixed(2)}</p>
+                    <p className="text-sm text-gray-500">
+                      Buyer: {order.buyer}
+                    </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
                       size="icon"
                       className="text-purple-600 hover:text-purple-700"
-                      onClick={(e) => toggleChat(item, e)}
-                      ref={(el) => (chatButtonRefs.current[item.id] = el)}
+                      onClick={(e) => toggleChat(order, e)}
+                      ref={(el) => (chatButtonRefs.current[order.id] = el)}
                     >
                       <MessageCircle className="h-5 w-5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="text-green-500 hover:text-green-700"
+                      onClick={() => markAsSold(order.id)}
+                      disabled={order.sold}
+                    >
+                      <CheckCircle className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="text-red-500 hover:text-red-700"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeOrder(order.id)}
                     >
                       <Trash2 className="h-5 w-5" />
                     </Button>

@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardFooter, CardHeader } from "../components/ui/card"
@@ -7,48 +5,49 @@ import { Input } from "../components/ui/input"
 import { Button } from "../components/ui/button"
 import { Search } from "lucide-react"
 import Sidebar from "../components/Sidebar"
+import img from "../assets/placeholder.png"
 
 const productsData = [
   { 
     id: 1,
     name: "Vintage Camera",
     description: "Capture memories with this classic vintage camera.",
-    imageUrl: "https://via.placeholder.com/150",
+    imageUrl: img,
     price: 79.99,
   },
   {
     id: 2,
     name: "Leather Journal",
     description: "Write down your thoughts in this elegant leather journal.",
-    imageUrl: "https://via.placeholder.com/150",
+    imageUrl: img,
     price: 49.99,
   },
   {
     id: 3,
     name: "Retro Sunglasses",
     description: "Stay stylish with these cool retro sunglasses.",
-    imageUrl: "https://via.placeholder.com/150",
+    imageUrl: img,
     price: 29.99,
   },
   {
     id: 4,
     name: "Portable Bluetooth Speaker",
     description: "Enjoy your favorite music on the go with this portable speaker.",
-    imageUrl: "https://via.placeholder.com/150",
+    imageUrl: img,
     price: 39.99,
   },
   {
     id: 5,
     name: "Ceramic Coffee Mug",
     description: "Start your day right with this unique ceramic coffee mug.",
-    imageUrl: "https://via.placeholder.com/150",
+    imageUrl: img,
     price: 19.99,
   },
   {
     id: 6,
     name: "Desk Organizer",
     description: "Keep your workspace tidy with this practical desk organizer.",
-    imageUrl: "https://via.placeholder.com/150",
+    imageUrl: img,
     price: 24.99,
   },
 ]
@@ -67,8 +66,6 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-gray-100 flex ">
       <Sidebar />
       <div className="flex-1 p-6 ml-16">
-        {" "}
-        {/* Add ml-16 to account for the collapsed sidebar width */}
         <div className="space-y-8 w-full max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-center text-gray-800">Best Finds on Campus</h1>
           <div className="flex justify-center">
@@ -100,7 +97,7 @@ export default function ProductsPage() {
                 </CardHeader>
                 <CardContent>
                   <img
-                    src={product.imageUrl || "/placeholder.svg"}
+                    src={product.imageUrl}
                     alt={product.name}
                     className="w-full h-48 object-cover rounded-md mb-4"
                   />
@@ -108,7 +105,7 @@ export default function ProductsPage() {
                 </CardContent>
                 <CardFooter className="justify-between items-center">
                   <span className="text-base font-medium">${product.price.toFixed(2)}</span>
-                  <Button size="sm" onClick={() => navigate(`/products/${product.id}`)}>
+                  <Button size="sm" onClick={() => navigate(`/product`)}>
                     View Details
                   </Button>
                 </CardFooter>
@@ -120,4 +117,3 @@ export default function ProductsPage() {
     </div>
   )
 }
-
