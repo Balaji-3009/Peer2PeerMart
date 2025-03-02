@@ -12,14 +12,14 @@ const Login: React.FC = () => {
     e.preventDefault();
 
     // Directly navigate to products page without checking login details
-    navigate("/products");
+    navigate("/details");
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="p-8 bg-white rounded-lg shadow-lg transform transition-all hover:scale-105 w-96">
         <h1 className="mb-6 text-3xl font-bold text-center text-gray-800">
-          Your Campus Marketplace
+          P2PMart
         </h1>
         <p className="mb-6 text-center text-gray-600">
           Sign in to buy and sell books, gadgets, and essentials with fellow
