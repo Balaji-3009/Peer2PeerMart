@@ -35,7 +35,7 @@ async def getProduct(productId: int, db: db_dependency, user_data = Depends(veri
         prod = db.query(Products).filter(Products.id == productId).first()
         if not prod:
             raise HTTPException(status_code=404, detail="Product not found")
-        fetchedUserName = db.query(Users.name).filter(Users.id == prod.user_id).first()[0]
+        fetchedUserName = db.query(Users.name).filter(Users.uuid == prod.user_id).first()[0]
         single_product = {}
         single_product["id"] = prod.id
         single_product["name"] = prod.name
@@ -60,7 +60,7 @@ async def getProducts(db: db_dependency, user_data = Depends(verify_token)):
         fetchedProducts = db.query(Products).all()
         for prod in fetchedProducts:
             single_product = {}
-            fetchedUserName = db.query(Users.name).filter(Users.id == prod.user_id).first()[0]
+            fetchedUserName = db.query(Users.name).filter(Users.uuid == prod.user_id).first()[0]
             single_product["id"] = prod.id
             single_product["name"] = prod.name
             single_product["user_id"] = prod.user_id
