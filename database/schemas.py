@@ -3,6 +3,7 @@ from datetime import date
 
 class UserBase(BaseModel):
     
+    uuid : str
     name : str
     regNo : str
     email : str

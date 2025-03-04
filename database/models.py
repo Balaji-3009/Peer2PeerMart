@@ -2,10 +2,22 @@ from sqlalchemy import Column, ForeignKey, Integer, String, JSON, Enum, Boolean,
 from database.session import Base
 from sqlalchemy.orm import relationship
 
+class Entry(Base):
+    
+    __tablename__ = "entry"
+
+    uuid = Column(String, primary_key=True, index=True) 
+    email = Column(String, unique=True, index=True, nullable=False)
+    is_new_user = Column(Boolean, default=True)
+
+    user = relationship("Users", back_populates="entry")
+
+
 class Users(Base):
 
     __tablename__ = 'users'
     id = Column(Integer, primary_key= True, index= True)
+    uuid = Column(String, ForeignKey("entry.uuid"))
     name = Column(String, index= True)
     regNo = Column(String)
     email = Column(String)
@@ -15,6 +27,7 @@ class Users(Base):
     
     product = relationship("Products", back_populates="user")
     transaction = relationship("Transactions", back_populates="user")
+    entry = relationship("Entry", back_populates="user")
     
 class Products(Base):
     

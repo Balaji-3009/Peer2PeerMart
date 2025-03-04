@@ -2,11 +2,14 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from database.session import db_dependency
 from database.models import Transactions, Products, Users
 from database.schemas import TransactionBase
+from .auth import verify_firebase_token
+from .user import verify_token
+
 
 transactionsRouter = APIRouter()
 
 @transactionsRouter.post('/createTransactions')
-async def createTransaction(transactions: TransactionBase, db: db_dependency, request: Request):
+async def createTransaction(transactions: TransactionBase, db: db_dependency, request: Request, user_data = Depends(verify_token)):
     try:
         newTransaction = Transactions(
             user_id = transactions.user_id,
@@ -27,7 +30,7 @@ async def createTransaction(transactions: TransactionBase, db: db_dependency, re
 
     
 @transactionsRouter.get("/getTransactions")
-async def getTransactions(db: db_dependency):
+async def getTransactions(db: db_dependency, user_data = Depends(verify_token)):
     try:
         all_transactions = []
         fetchedTransactions = db.query(Transactions).all()
