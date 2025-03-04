@@ -13,7 +13,8 @@ class Entry(Base):
     user = relationship("Users", back_populates="entry")
     product = relationship("Products", back_populates="entry")
     transaction = relationship("Transactions", back_populates="entry")
-    chat = relationship("Chat", back_populates="entry")
+    buyer_chats = relationship("Chat", back_populates="buyer", foreign_keys="[Chat.buyer_id]")
+    seller_chats = relationship("Chat", back_populates="seller", foreign_keys="[Chat.seller_id]")
     message = relationship("Message", back_populates="entry")
 
 
@@ -67,7 +68,8 @@ class Chat(Base):
     seller_id = Column(String, ForeignKey('entry.uuid'))
     product_id = Column(Integer, ForeignKey('products.id'))
     
-    entry = relationship("Entry", back_populates="chat")
+    buyer = relationship("Entry", back_populates="buyer_chats", foreign_keys=[buyer_id])
+    seller = relationship("Entry", back_populates="seller_chats", foreign_keys=[seller_id])
     message = relationship("Message", back_populates="chat")
 
 class Message(Base):
