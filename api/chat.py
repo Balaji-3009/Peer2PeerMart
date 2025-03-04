@@ -30,7 +30,7 @@ def get_messages(chat_id: int, db: db_dependency, user_data = Depends(verify_tok
     return [{"sender_id": m.sender_id, "content": m.content, "created_at": m.created_at} for m in messages]
 
 @chatRouter.websocket("/ws/{chat_id}/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: int, db: db_dependency, user_data = Depends(verify_token)):
+async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: str, db: db_dependency, user_data = Depends(verify_token)):
     await websocket.accept()
 
     if chat_id not in active_connections:
