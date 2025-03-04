@@ -39,8 +39,8 @@ async def getTransactions(db: db_dependency, user_data = Depends(verify_token)):
         for tran in fetchedTransactions:
             single_transaction = {}
             fetchedProduct = db.query(Products).filter(Products.id == tran.product_id).first()
-            fetchedBuyer = db.query(Users).filter(Users.id == tran.user_id).first()
-            fetchedSeller = db.query(Users).filter(Users.id == fetchedProduct.user_id).first()
+            fetchedBuyer = db.query(Users).filter(Users.uuid == tran.user_id).first()
+            fetchedSeller = db.query(Users).filter(Users.uuid == fetchedProduct.user_id).first()
             single_transaction["id"] = tran.id
             single_transaction["buyer_id"] = tran.user_id
             single_transaction["buyer_name"] = fetchedBuyer.name
