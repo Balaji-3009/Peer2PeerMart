@@ -42,7 +42,7 @@ async def createUsers(users: UserBase, db: db_dependency, request: Request, user
         raise HTTPException(status_code=500, detail=str(e))
 
 @usersRouter.get("/getUser/{userId}")
-async def getUser(userId: int, db: db_dependency, user_data = Depends(verify_token)):
+async def getUser(userId: str, db: db_dependency, user_data = Depends(verify_token)):
     try:
         fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
         if not fetchedUser:
