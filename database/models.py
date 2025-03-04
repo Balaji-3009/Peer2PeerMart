@@ -37,8 +37,26 @@ class Transactions(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     product_id = Column(Integer, ForeignKey("products.id"))
     price = Column(String)
-    confirmation = Column(String)
+    confirmation = Column(Integer, default=0)
+    createdAt = Column(DateTime, default=func.now())
+    updatedAt = Column(DateTime, default=func.now(), onupdate=func.now())
     
     user = relationship("Users", back_populates="transaction")
     product = relationship("Products", back_populates="transaction")
     
+class Chat(Base):
+    
+    __tablename__ = 'chats'
+    chat_id = Column(Integer, primary_key=True)
+    buyer_id = Column(Integer, ForeignKey('users.id'))
+    seller_id = Column(Integer, ForeignKey('users.id'))
+    product_id = Column(Integer, ForeignKey('products.id'))
+
+class Message(Base):
+    
+    __tablename__ = 'messages'
+    message_id = Column(Integer, primary_key=True)
+    chat_id = Column(Integer, ForeignKey('chats.chat_id'))
+    sender_id = Column(Integer, ForeignKey('users.id'))
+    content = Column(String, nullable=False)
+    created_at = Column(DateTime, default=func.now())
