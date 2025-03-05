@@ -61,47 +61,67 @@ async def getTransactions(db: db_dependency, user_data = Depends(verify_token)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-# @productsRouter.put('/updateProduct')
-# async def updateProduct(products: ProductBase, productId: int, db: db_dependency, request: Request):
-#     try:
-#         fetchedProduct = db.query(Products).filter(Products.id == productId).first()
-#         if not fetchedProduct:
-#             raise HTTPException(status_code=404, detail="Product not found")
-#         fetchedProduct.name = products.name
-#         fetchedProduct.user_id = products.user_id
-#         fetchedProduct.price = products.price
-#         fetchedProduct.desc = products.desc
-        
-#         db.commit()
-        
-#         fetchedProduct = db.query(Products).filter(Products.id == productId).first()
-        
-#         return {
-#             "status": "success",
-#             "message": "Product updated successfully",
-#             "data": fetchedProduct
-#         }
-#     except Exception as e:
-#         print(e)
-#         raise HTTPException(status_code=500, detail=str(e))
+@transactionsRouter.get("/getWishList")
+async def getWishList(db: db_dependency, user_id:str, user_data = Depends(verify_token)):
+    try:
+        all_transactions = []
+        fetchedTransactions = db.query(Transactions).filter(Transactions.user_id == user_id).all()
+        if not fetchedTransactions:
+            raise HTTPException(status_code=404, detail="Transactions not found")
+        for tran in fetchedTransactions:
+            single_transaction = {}
+            fetchedProduct = db.query(Products).filter(Products.id == tran.product_id).first()
+            fetchedBuyer = db.query(Users).filter(Users.uuid == tran.user_id).first()
+            fetchedSeller = db.query(Users).filter(Users.uuid == fetchedProduct.user_id).first()
+            single_transaction["id"] = tran.id
+            single_transaction["buyer_id"] = tran.user_id
+            single_transaction["buyer_name"] = fetchedBuyer.name
+            single_transaction["product_id"] = fetchedProduct.id
+            single_transaction["product_name"] = fetchedProduct.name
+            single_transaction["seller_id"] = fetchedProduct.user_id
+            single_transaction["seller_name"] = fetchedSeller.name
+            single_transaction["price"] = tran.price
+            single_transaction["confirmation"] = tran.confirmation
+            single_transaction["created_at"] = tran.createdAt
+            single_transaction["updated_at"] = tran.updatedAt
+            all_transactions.append(single_transaction)
+        return {
+            "status": "success",
+            "message": "Products fetched successfully",
+            "data": all_transactions
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
-# @productsRouter.delete('/deleteProduct')
-# async def deleteProduct(productId: int, db: db_dependency, request: Request):
-#     try:
-#         fetchedProduct = db.query(Products).filter(Products.id == productId).first()
-#         if not fetchedProduct:
-#             raise HTTPException(status_code=404, detail="Product not found")
-        
-#         db.delete(fetchedProduct)
-        
-#         db.commit()
-        
-#         return {
-#             "status": "success",
-#             "message": "Product deleted successfully",
-#             "data": fetchedProduct
-#         }
-#     except Exception as e:
-#         print(e)
-#         raise HTTPException(status_code=500, detail=str(e))
-
+@transactionsRouter.get("/getMyOrders")
+async def getMyOrders(db: db_dependency, user_id:str, user_data = Depends(verify_token)):
+    try:
+        all_transactions = []
+        fetchedTransactions = db.query(Transactions).filter(Transactions.user_id != user_id).all()
+        if not fetchedTransactions:
+            raise HTTPException(status_code=404, detail="Transactions not found")
+        for tran in fetchedTransactions:
+            single_transaction = {}
+            fetchedProduct = db.query(Products).filter(Products.id == tran.product_id).first()
+            if (fetchedProduct.user_id == user_id):
+                fetchedBuyer = db.query(Users).filter(Users.uuid == tran.user_id).first()
+                fetchedSeller = db.query(Users).filter(Users.uuid == fetchedProduct.user_id).first()
+                single_transaction["id"] = tran.id
+                single_transaction["buyer_id"] = tran.user_id
+                single_transaction["buyer_name"] = fetchedBuyer.name
+                single_transaction["product_id"] = fetchedProduct.id
+                single_transaction["product_name"] = fetchedProduct.name
+                single_transaction["seller_id"] = fetchedProduct.user_id
+                single_transaction["seller_name"] = fetchedSeller.name
+                single_transaction["price"] = tran.price
+                single_transaction["confirmation"] = tran.confirmation
+                single_transaction["created_at"] = tran.createdAt
+                single_transaction["updated_at"] = tran.updatedAt
+                all_transactions.append(single_transaction)
+        return {
+            "status": "success",
+            "message": "Products fetched successfully",
+            "data": all_transactions
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
