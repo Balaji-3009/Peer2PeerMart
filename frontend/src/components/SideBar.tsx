@@ -7,11 +7,15 @@ import {
   Heart,
   ChevronRight,
   ChevronLeft,
+  ClipboardList,
+  Home,
+  LogOut,
 } from "lucide-react";
-import { Button } from "./ui/button";
-import { IoHomeOutline } from "react-icons/io5";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -26,37 +30,60 @@ const Sidebar = () => {
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
+  const handleLogout = () => {
+    navigate("/");
+    localStorage.removeItem("uuid");
+  };
+
   const menuItems = [
-    { icon: <IoHomeOutline />, label: "Home", href: "/products" },
+    { icon: <Home className="h-5 w-5" />, label: "Home", href: "/products" },
+    {
+      icon: <ClipboardList className="h-5 w-5" />,
+      label: "My Products",
+      href: "/myproducts",
+    },
     {
       icon: <Package className="h-5 w-5" />,
       label: "Create Product",
-      href: "./myproducts",
+      href: "/create",
     },
     {
       icon: <ShoppingCart className="h-5 w-5" />,
       label: "Received Orders",
-      href: "./received",
+      href: "/received",
     },
     {
       icon: <Heart className="h-5 w-5" />,
       label: "Wishlist",
-      href: "./wishlist",
+      href: "/wishlist",
     },
   ];
 
   return (
     <>
+      {/* Top Navbar */}
+      <nav className="fixed top-0 left-0 w-full bg-white shadow-md py-3 px-6 flex justify-between items-center z-30">
+        <h1 className="text-xl font-bold text-purple-600">P2P Mart</h1>
+        <Button
+          variant="ghost"
+          className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition"
+          onClick={handleLogout}
+        >
+          Logout <LogOut className="h-5 w-5 ml-2" />
+        </Button>
+      </nav>
+
+      {/* Sidebar for Desktop */}
       {!isMobile ? (
         <div
-          className={`fixed left-0 top-0 h-full bg-white shadow-lg transition-all z-10 duration-300 ease-in-out flex flex-col ${
+          className={`fixed left-0 top-0 h-full bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col z-20 pt-16 ${
             isOpen ? "w-64" : "w-16"
           }`}
         >
           <Button
             variant="ghost"
             size="icon"
-            className="absolute -right-3 top-4 bg-purple-600 text-white rounded-full p-1 hover:bg-purple-700"
+            className="absolute -right-3 top-20 bg-purple-600 text-white rounded-full p-1 hover:bg-purple-700"
             onClick={toggleSidebar}
           >
             {isOpen ? (
@@ -66,7 +93,7 @@ const Sidebar = () => {
             )}
           </Button>
 
-          <div className="flex flex-col items-center pt-16">
+          <div className="flex flex-col items-center pt-4">
             {menuItems.map((item, index) => (
               <a
                 key={index}
@@ -76,13 +103,16 @@ const Sidebar = () => {
                 }`}
               >
                 {item.icon}
-                {isOpen && <span className="font-medium">{item.label}</span>}
+                {isOpen && (
+                  <span className="font-medium ml-4">{item.label}</span>
+                )}
               </a>
             ))}
           </div>
         </div>
       ) : (
-        <div className="fixed bottom-0 left-0 w-full bg-white shadow-lg flex justify-around py-3 z-10">
+        /* Mobile Bottom Navbar */
+        <div className="fixed bottom-0 left-0 w-full bg-white shadow-lg flex justify-around py-3 z-20">
           {menuItems.map((item, index) => (
             <a
               key={index}

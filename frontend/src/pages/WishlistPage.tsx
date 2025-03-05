@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -12,61 +12,108 @@ import { Button } from "../components/ui/button";
 import { Trash2, MessageCircle } from "lucide-react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
-// Dummy wishlist data
-const initialWishlistItems = [
-  { id: 1, name: "Smartphone X", price: 799.99 },
-  { id: 2, name: "Laptop Pro", price: 1299.99 },
-  { id: 3, name: "Wireless Earbuds", price: 149.99 },
-];
+import placeholderImg from "../assets/placeholder.png";
+import { Toaster, toast } from "sonner";
 
 export default function WishlistPage() {
-  const [wishlistItems, setWishlistItems] = useState(initialWishlistItems);
+  const [wishlistItems, setWishlistItems] = useState([]);
   const [chatItem, setChatItem] = useState(null);
   const [chatPosition, setChatPosition] = useState({ top: 0, left: 0 });
   const navigate = useNavigate();
   const chatButtonRefs = useRef({});
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const idToken = localStorage.getItem("idToken");
+        const userId = localStorage.getItem("uuid");
+
+        if (!userId) {
+          toast.error("User ID not found. Please log in.");
+          return;
+        }
+
+        const response = await fetch(
+          `https://peer2peermart.onrender.com/transactions/getWishList?user_id=${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+          setWishlistItems(
+            data.data.map((item) => ({
+              id: item.id,
+              productName: item.product_name,
+              price: item.price,
+              sellerName: item.seller_name,
+              imageUrl: placeholderImg,
+              seller_id: item.seller_id,
+              buyer_id: item.buyer_id,
+              product_id: item.product_id,
+            }))
+          );
+        } else {
+          toast.error("Failed to fetch wishlist.");
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+        toast.error("An error occurred. Please try again.");
+      }
+    };
+    fetchWishlist();
+  }, []);
 
   const removeItem = (id) => {
     setWishlistItems((items) => items.filter((item) => item.id !== id));
   };
 
   const toggleChat = (item, event) => {
-    const buttonRect = chatButtonRefs.current[item.id].getBoundingClientRect();
+    const buttonRect = chatButtonRefs.current[item.id]?.getBoundingClientRect();
+    if (!buttonRect) return;
+
     const newPosition = {
       top: buttonRect.top + window.scrollY,
-      left: buttonRect.right + window.scrollX + 10, // 10px offset from the button
+      left: buttonRect.right + window.scrollX + 10,
     };
 
-    if (chatItem && chatItem.id === item.id) {
-      setChatItem(null);
-    } else {
-      setChatItem(item);
-      setChatPosition(newPosition);
-    }
+    setChatItem(chatItem && chatItem.id === item.id ? null : item);
+    setChatPosition(newPosition);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative mt-10">
       <Sidebar />
+      <Toaster position="top-right" />
+
       <Card className="w-full max-w-4xl overflow-hidden">
         <CardHeader className="bg-purple-600 text-white p-6">
           <h1 className="text-3xl font-bold">Your Wishlist</h1>
         </CardHeader>
+
         <CardContent className="p-6">
           {wishlistItems.length === 0 ? (
             <p className="text-gray-600 text-center">Your wishlist is empty.</p>
           ) : (
             <ul className="divide-y divide-gray-200">
               {wishlistItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="py-4 flex items-center justify-between"
-                >
+                <li key={item.id} className="py-4 flex items-center space-x-4">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.productName}
+                    className="w-16 h-16 object-cover rounded-lg"
+                  />
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-800">
-                      {item.name}
+                      {item.productName}
                     </h3>
-                    <p className="text-gray-600">${item.price.toFixed(2)}</p>
+                    <p className="text-gray-600">Seller: {item.sellerName}</p>
+                    <p className="text-gray-600">${item.price}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
@@ -92,6 +139,7 @@ export default function WishlistPage() {
             </ul>
           )}
         </CardContent>
+
         <CardFooter className="bg-gray-50 p-6 flex justify-between items-center">
           <Button
             variant="outline"
@@ -103,10 +151,14 @@ export default function WishlistPage() {
         </CardFooter>
       </Card>
 
-      {/* Chat Window */}
       {chatItem && (
         <ChatWindow
-          item={chatItem}
+          item={{
+            ...chatItem,
+            buyer_id: chatItem.buyer_id,
+            seller_id: chatItem.seller_id,
+            product_id: chatItem.product_id,
+          }}
           onClose={() => setChatItem(null)}
           position={chatPosition}
         />

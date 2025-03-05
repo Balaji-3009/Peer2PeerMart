@@ -27,6 +27,7 @@ export default function CreateProductPage() {
     condition: 5,
     description: "",
     image: null,
+    imageUrl: "", // Store uploaded image URL
   });
 
   const handleInputChange = (e) => {
@@ -36,11 +37,47 @@ export default function CreateProductPage() {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setProductData((prev) => ({ ...prev, image: file }));
+    if (!file) {
+      toast.error("No file selected.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append(
+      "upload_preset",
+      import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+    ); // Ensure this is correctly set in `.env`
+
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${
+      import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+    }/image/upload`;
+
+    try {
+      const response = await fetch(cloudinaryUrl, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Cloudinary Error:", data);
+        throw new Error(data.error?.message || "Image upload failed");
+      }
+
+      setProductData((prev) => ({
+        ...prev,
+        image: file,
+        imageUrl: data.secure_url,
+      }));
+
+      toast.success("Image uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading image:", error.message);
+      toast.error(`Failed to upload image: ${error.message}`);
     }
   };
 
@@ -57,9 +94,11 @@ export default function CreateProductPage() {
 
     const productDetails = {
       name: productData.name,
-      user_id:uuid, // Ensure it's a number
+      user_id: uuid,
       price: productData.price,
       desc: productData.description,
+      image: productData.imageUrl, // Use secure URL from Cloudinary
+      negotiable: productData.negotiable ? 1 : 0, // Convert boolean to 1 or 0
     };
 
     try {
@@ -91,7 +130,7 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white-100">
+    <div className="min-h-screen flex bg-white-100 mt-10">
       <Sidebar />
       <div className="flex-1 p-10">
         <Card className="w-full max-w-2xl mx-auto shadow-lg border border-violet-300">
@@ -139,10 +178,8 @@ export default function CreateProductPage() {
                   onCheckedChange={(checked) =>
                     setProductData((prev) => ({ ...prev, negotiable: checked }))
                   }
-                  className="border border-violet-500 focus:ring-violet-500 data-[state=checked]:bg-violet-700 data-[state=unchecked]:bg-gray-300 rounded-full w-12 h-6 relative"
-                >
-                  <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transform transition-transform duration-300 data-[state=checked]:translate-x-6"></div>
-                </Switch>
+                  className="border border-violet-500"
+                />
                 <Label
                   htmlFor="negotiable"
                   className="text-violet-700 font-semibold"
@@ -164,20 +201,7 @@ export default function CreateProductPage() {
                     setProductData((prev) => ({ ...prev, condition: value[0] }))
                   }
                   className="w-full"
-                >
-                  <div className="h-2 bg-violet-300 rounded-md relative">
-                    <div
-                      className="h-2 bg-violet-700 rounded-md"
-                      style={{
-                        width: `${(productData.condition / 10) * 100}%`,
-                      }}
-                    ></div>
-                    <div
-                      className="w-5 h-5 bg-violet-700 rounded-full absolute top-1/2 -translate-y-1/2"
-                      style={{ left: `${(productData.condition / 10) * 100}%` }}
-                    ></div>
-                  </div>
-                </Slider>
+                />
                 <div className="text-center font-semibold text-violet-700">
                   {productData.condition} / 10
                 </div>

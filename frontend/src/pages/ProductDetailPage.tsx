@@ -11,13 +11,12 @@ import { Heart } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import Sidebar from "../components/Sidebar";
 import ReportSellerModal from "../components/ReportSellerModal";
-import img from "../assets/placeholder.png";
 
 export default function ProductDetailPage() {
   const navigate = useNavigate();
-  const { id: productId } = useParams();
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [wishlistItems, setWishlistItems] = useState(0);
+  const [wishlistAdded, setWishlistAdded] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ export default function ProductDetailPage() {
       try {
         const idToken = localStorage.getItem("idToken");
         const response = await fetch(
-          `https://peer2peermart.onrender.com/products/getProduct/${productId}`,
+          `https://peer2peermart.onrender.com/products/getProduct/${id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -40,7 +39,9 @@ export default function ProductDetailPage() {
             name: data.data.name,
             description: data.data.desc || "No description available",
             price: parseFloat(data.data.price) || 0,
-            imageUrl: img,
+            imageUrl: data.data.image,
+            longDescription: "Detailed description is currently unavailable.",
+            specs: data.data.specs || [],
           });
         }
       } catch (error) {
@@ -49,11 +50,47 @@ export default function ProductDetailPage() {
     };
 
     fetchProductDetails();
-  }, [productId]);
+  }, [id]);
+  const handleAddToWishlist = async () => {
+    if (wishlistAdded) return; // Prevent multiple clicks
 
-  const handleAddToWishlist = () => {
-    setWishlistItems((prevItems) => prevItems + 1);
-    toast.success("Added to wishlist!", { duration: 3000 });
+    try {
+      const idToken = localStorage.getItem("idToken");
+      const userId = localStorage.getItem("uuid"); // Assuming 'uuid' is stored in localStorage
+
+      if (!userId) {
+        toast.error("User ID not found. Please log in again.");
+        return;
+      }
+
+      const response = await fetch(
+        `https://peer2peermart.onrender.com/transactions/createTransactions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            product_id: product.id,
+            price: product.price.toString(),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        setWishlistAdded(true);
+        toast.success("Added to wishlist!", { duration: 3000 });
+      } else {
+        toast.error(data.message || "Failed to add to wishlist.");
+      }
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      toast.error("An error occurred. Please try again.");
+    }
   };
 
   const handleReportSubmit = (reason) => {
@@ -72,7 +109,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6 relative">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative mt-10">
       <Sidebar />
       <Toaster position="top-right" offset={50} />
 
@@ -80,40 +117,53 @@ export default function ProductDetailPage() {
         <Button
           variant="ghost"
           className="relative"
-          onClick={() => navigate("/wishlist")}
+          onClick={handleAddToWishlist}
+          disabled={wishlistAdded}
         >
-          <Heart className="h-6 w-6 text-purple-600" />
-          {wishlistItems > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-              {wishlistItems}
-            </span>
-          )}
+          <Heart
+            className={`h-6 w-6 ${
+              wishlistAdded ? "text-red-500" : "text-purple-600"
+            }`}
+          />
         </Button>
       </div>
 
-      <Card className="w-full max-w-2xl text-center">
+      <Card className="w-full max-w-4xl overflow-hidden">
         <CardHeader className="p-0">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-64 object-cover"
+            className="w-full h-[50vh] object-contain"
           />
         </CardHeader>
         <CardContent className="p-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
-            {product.name}
-          </h1>
-          <p className="text-gray-600 mb-6">{product.description}</p>
-          <p className="text-2xl font-bold text-purple-600">
-            ${product.price.toFixed(2)}
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
+            <p className="text-2xl font-bold text-purple-600">
+              ${product.price.toFixed(2)}
+            </p>
+          </div>
+          <p className="text-gray-600 mb-6">{product.longDescription}</p>
+          {product.specs.length > 0 && (
+            <>
+              <h2 className="text-xl font-semibold mb-2">Specifications:</h2>
+              <ul className="list-disc pl-5 mb-6">
+                {product.specs.map((spec, index) => (
+                  <li key={index} className="text-gray-600">
+                    {spec}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </CardContent>
-        <CardFooter className="bg-gray-50 p-6 flex flex-wrap gap-4 justify-center">
+        <CardFooter className="bg-gray-50 p-6 flex flex-wrap gap-4">
           <Button
             className="bg-purple-600 hover:bg-purple-700 text-white"
             onClick={handleAddToWishlist}
+            disabled={wishlistAdded}
           >
-            Add to Wishlist
+            {wishlistAdded ? "Added to Wishlist" : "Add to Wishlist"}
           </Button>
           <Button
             variant="outline"

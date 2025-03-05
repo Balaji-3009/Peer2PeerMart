@@ -34,12 +34,16 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       const idToken = localStorage.getItem("idToken");
+      const uuid = localStorage.getItem("uuid");
       if (!idToken) {
         console.error("No ID token found in localStorage");
         return;
       }
+      console.log(
+        `https://peer2peermart.onrender.com/products/getProducts?user_id=${uuid})`
+      );
       const response = await fetch(
-        "https://peer2peermart.onrender.com/products/getProducts",
+        `https://peer2peermart.onrender.com/products/getProducts?user_id=${uuid}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -49,14 +53,13 @@ export default function ProductsPage() {
       );
       const data = await response.json();
       if (data.status === "success") {
-
         const formattedProducts = data.data
           .filter((product) => product.name && product.price) // Filter out incomplete products
           .map((product) => ({
             id: product.id,
             name: product.name || "Unnamed Product",
             description: product.desc || "No description available",
-            imageUrl: img,
+            image: product.image,
             price: parseFloat(product.price) || 0,
           }));
         setProducts(formattedProducts);
@@ -87,7 +90,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100 flex mt-10">
       <Sidebar />
       <div className="flex-1 p-6">
         <div className="space-y-8 w-full max-w-4xl mx-auto">
@@ -157,7 +160,7 @@ export default function ProductsPage() {
                 </CardHeader>
                 <CardContent>
                   <img
-                    src={product.imageUrl || img}
+                    src={product.image || img}
                     alt={product.name}
                     className="w-full h-48 object-cover rounded-md mb-4"
                   />

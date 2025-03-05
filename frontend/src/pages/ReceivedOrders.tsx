@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -12,19 +12,59 @@ import { Trash2, MessageCircle, CheckCircle } from "lucide-react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
-// Dummy received orders data
-const initialReceivedOrders = [
-  { id: 1, name: "Smartphone X", price: 799.99, buyer: "John Doe" },
-  { id: 2, name: "Laptop Pro", price: 1299.99, buyer: "Jane Smith" },
-  { id: 3, name: "Wireless Earbuds", price: 149.99, buyer: "Bob Johnson" },
-];
+import { Toaster, toast } from "sonner";
 
 export default function ReceivedOrders() {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState(initialReceivedOrders);
+  const [orders, setOrders] = useState([]);
   const [chatItem, setChatItem] = useState(null);
   const [chatPosition, setChatPosition] = useState({ top: 0, left: 0 });
   const chatButtonRefs = useRef({});
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const idToken = localStorage.getItem("idToken");
+        const userId = localStorage.getItem("uuid");
+
+        if (!userId) {
+          toast.error("User ID not found. Please log in.");
+          return;
+        }
+
+        const response = await fetch(
+          `https://peer2peermart.onrender.com/transactions/getMyOrders?user_id=${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+          setOrders(
+            data.data.map((order) => ({
+              id: order.id,
+              name: order.product_name,
+              price: order.price,
+              buyer: order.buyer_name,
+              sold: order.sold || false,
+            }))
+          );
+        } else {
+          toast.error("Failed to fetch orders.");
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("An error occurred. Please try again.");
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   const removeOrder = (id) => {
     setOrders((items) => items.filter((item) => item.id !== id));
@@ -37,23 +77,23 @@ export default function ReceivedOrders() {
   };
 
   const toggleChat = (item, event) => {
-    const buttonRect = chatButtonRefs.current[item.id].getBoundingClientRect();
+    const buttonRect = chatButtonRefs.current[item.id]?.getBoundingClientRect();
+    if (!buttonRect) return;
+
     const newPosition = {
       top: buttonRect.top + window.scrollY,
       left: buttonRect.right + window.scrollX + 10,
     };
 
-    if (chatItem && chatItem.id === item.id) {
-      setChatItem(null);
-    } else {
-      setChatItem(item);
-      setChatPosition(newPosition);
-    }
+    setChatItem(chatItem && chatItem.id === item.id ? null : item);
+    setChatPosition(newPosition);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative mt-10">
       <Sidebar />
+      <Toaster position="top-right" />
+
       <Card className="w-full max-w-4xl overflow-hidden">
         <CardHeader className="bg-purple-600 text-white p-6">
           <h1 className="text-3xl font-bold">Received Orders</h1>
@@ -72,7 +112,7 @@ export default function ReceivedOrders() {
                     <h3 className="text-lg font-semibold text-gray-800">
                       {order.name}
                     </h3>
-                    <p className="text-gray-600">${order.price.toFixed(2)}</p>
+                    <p className="text-gray-600">${order.price}</p>
                     <p className="text-sm text-gray-500">
                       Buyer: {order.buyer}
                     </p>

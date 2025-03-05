@@ -5,7 +5,7 @@ import WishlistPage from "./pages/WishlistPage"; // Ensure correct import
 import ReceivedOrders from "./pages/ReceivedOrders"; // Ensure correct import
 import DetailsPage from "./pages/DetailsPage"; // Ensure correct import
 import CreateProductPage from "./pages/CreateProductPage"; // Ensure correct import
-
+import Sidebar from "../src/components/SideBar";
 import "./App.css";
 import AuthPage from "./pages/AuthPage";
 import MyProducts from "./pages/MyProducts";

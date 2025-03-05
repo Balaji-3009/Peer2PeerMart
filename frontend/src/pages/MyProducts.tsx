@@ -1,135 +1,218 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardFooter, CardHeader } from "../components/ui/card"
 import { Button } from "../components/ui/button"
-import { Pencil, Trash2, ShoppingBag } from "lucide-react"
+import { Pencil, Trash2, ShoppingBag, Plus, ArrowLeft } from "lucide-react"
 import EditProductDetails from "../components/EditProductDetails"
 import Sidebar from "../components/Sidebar"
 
-// Dummy products data
-const initialProducts = [
-  {
-    id: 1,
-    name: "Organic Cotton T-Shirt",
-    price: 29.99,
-    description: "Soft, eco-friendly cotton t-shirt available in multiple colors.",
-    stock: 45,
-    category: "Clothing",
-  },
-  {
-    id: 2,
-    name: "Handcrafted Ceramic Mug",
-    price: 18.5,
-    description: "Unique handmade ceramic mug, perfect for your morning coffee.",
-    stock: 23,
-    category: "Home Goods",
-  },
-  {
-    id: 3,
-    name: "Natural Beeswax Candle",
-    price: 12.99,
-    description: "100% pure beeswax candle with a subtle honey scent.",
-    stock: 67,
-    category: "Home Decor",
-  },
-  {
-    id: 4,
-    name: "Handwoven Basket",
-    price: 34.99,
-    description: "Traditional handwoven basket made from sustainable materials.",
-    stock: 15,
-    category: "Home Goods",
-  },
-]
-
-export default function ProductsPage() {
-  const [products, setProducts] = useState(initialProducts)
+export default function MyProducts() {
+  const [products, setProducts] = useState([])
   const [editProduct, setEditProduct] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
-  const editButtonRefs = useRef({})
 
-  const removeProduct = (id) => {
-    setProducts((items) => items.filter((item) => item.id !== id))
+  const idToken = localStorage.getItem("idToken")
+  const uuid = localStorage.getItem("uuid")
+
+  // Fetch products data from the API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch(`https://peer2peermart.onrender.com/products/getMyProducts?user_id=${uuid}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+        })
+
+        const data = await response.json()
+
+        if (data.status === "success") {
+          setProducts(data.data)
+        } else {
+          console.error("Failed to fetch products:", data.message)
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [uuid, idToken])
+
+  // Remove product from the UI and backend
+  const removeProduct = async (id) => {
+    try {
+      const response = await fetch(`https://peer2peermart.onrender.com/products/deleteProduct/?productId=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (data.status === "success") {
+        setProducts((items) => items.filter((item) => item.id !== id))
+        alert("Product deleted successfully")
+      } else {
+        console.error("Failed to delete product")
+        alert("Failed to delete product")
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error)
+      alert("Error deleting product")
+    }
   }
 
   const openEditPopup = (product) => {
     setEditProduct(product)
   }
 
+  // Handle product update
+  const handleProductUpdated = (updatedProduct) => {
+    setProducts(products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)))
+    setEditProduct(null)
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative">
+    <div className="min-h-screen bg-gray-100 flex mt-10">
       <Sidebar />
-      <Card className="w-full max-w-4xl overflow-hidden">
-        <CardHeader className="bg-purple-600 text-white p-6 flex justify-between items-center">
-          <h1 className="text-3xl font-bold">My Products</h1>
-          <Button className="bg-white text-purple-600 hover:bg-gray-100" onClick={() => navigate("/create")}>
-            Add New Product
-          </Button>
-        </CardHeader>
-        <CardContent className="p-6">
-          {products.length === 0 ? (
-            <div className="text-center py-8">
-              <ShoppingBag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">You haven't added any products yet.</p>
-              <Button
-                className="mt-4 bg-purple-600 hover:bg-purple-700 text-white"
-                onClick={() => navigate("/add-product")}
-              >
-                Add Your First Product
-              </Button>
-            </div>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {products.map((product) => (
-                <li key={product.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                    <p className="text-purple-600 font-medium">${product.price.toFixed(2)}</p>
-                    <p className="text-gray-600 text-sm mt-1 line-clamp-2">{product.description}</p>
-                    <div className="flex gap-4 mt-1 text-sm text-gray-500">
-                      <span>Stock: {product.stock}</span>
-                      <span>Category: {product.category}</span>
+      <div className="flex-1 p-6">
+        <Card className="w-full max-w-5xl mx-auto shadow-md">
+          <CardHeader className="bg-purple-600 text-white p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h1 className="text-2xl sm:text-3xl font-bold">My Products</h1>
+            <Button
+              className="bg-white text-purple-600 hover:bg-gray-100 flex items-center gap-2"
+              onClick={() => navigate("/create")}
+            >
+              <Plus className="h-4 w-4" /> Add New Product
+            </Button>
+          </CardHeader>
+
+          <CardContent className="p-6">
+            {isLoading ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600">Loading products...</p>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingBag className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">No products yet</h3>
+                <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                  You haven't added any products to your store. Start selling by adding your first product.
+                </p>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => navigate("/create")}>
+                  <Plus className="h-4 w-4 mr-2" /> Add Your First Product
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6">
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex flex-col sm:flex-row gap-6 p-4 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50/30 transition-colors"
+                  >
+                    <div className="sm:w-48 sm:h-48 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      {product.image ? (
+                        <img
+                          src={product.image || "/placeholder.svg"}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null
+                            e.target.src = "https://via.placeholder.com/150?text=No+Image"
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <ShoppingBag className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-gray-800 mb-1">{product.name}</h3>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-purple-600 font-medium text-lg">
+                              ${Number.parseFloat(product.price).toFixed(2)}
+                            </span>
+                            {product.negotiable && (
+                              <span className="text-xs bg-purple-50 text-purple-600 border border-purple-200 px-2 py-0.5 rounded-full">
+                                Negotiable
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2 sm:self-start">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700"
+                            onClick={() => openEditPopup(product)}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" /> Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                            onClick={() => removeProduct(product.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" /> Delete
+                          </Button>
+                        </div>
+                      </div>
+
+                      <p className="text-gray-600 mb-3 line-clamp-3">{product.desc}</p>
+
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-500">
+                        {product.category && (
+                          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{product.category}</span>
+                        )}
+                        {product.stock !== undefined && (
+                          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                            Stock: {product.stock}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-purple-600 hover:text-purple-700"
-                      onClick={() => openEditPopup(product)}
-                      ref={(el) => (editButtonRefs.current[product.id] = el)}
-                    >
-                      <Pencil className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => removeProduct(product.id)}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-        <CardFooter className="bg-gray-50 p-6 flex justify-between items-center">
-          <Button
-            variant="outline"
-            className="border-purple-600 text-purple-600 hover:bg-purple-100"
-            onClick={() => navigate("/dashboard")}
-          >
-            Back to Dashboard
-          </Button>
-        </CardFooter>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+
+          <CardFooter className="bg-gray-50 p-6 flex justify-between items-center border-t">
+            <Button
+              variant="outline"
+              className="border-purple-600 text-purple-600 hover:bg-purple-50"
+              onClick={() => navigate("/products")}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back to All Products
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
 
       {/* Edit Product Popup */}
-      {editProduct && <EditProductDetails product={editProduct} onClose={() => setEditProduct(null)} />}
+      {editProduct && (
+        <EditProductDetails
+          product={editProduct}
+          onClose={() => setEditProduct(null)}
+          onUpdate={handleProductUpdated}
+        />
+      )}
     </div>
   )
 }
