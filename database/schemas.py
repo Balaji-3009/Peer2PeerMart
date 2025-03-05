@@ -3,6 +3,7 @@ from datetime import date
 
 class UserBase(BaseModel):
     
+    uuid : str
     name : str
     regNo : str
     email : str
@@ -11,18 +12,18 @@ class UserBase(BaseModel):
 class ProductBase(BaseModel):
     
     name : str
-    user_id : int
+    user_id : str
     price : str
     desc : str
     
 class TransactionBase(BaseModel):
     
-    user_id : int
+    user_id : str
     product_id : int
     price : str
     
 class ChatBase(BaseModel):
     
-    buyer_id : int
-    seller_id : int
+    buyer_id : str
+    seller_id : str
     product_id : int

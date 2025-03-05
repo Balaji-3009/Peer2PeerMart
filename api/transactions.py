@@ -2,11 +2,14 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from database.session import db_dependency
 from database.models import Transactions, Products, Users
 from database.schemas import TransactionBase
+from .auth import verify_firebase_token
+from .user import verify_token
+
 
 transactionsRouter = APIRouter()
 
 @transactionsRouter.post('/createTransactions')
-async def createTransaction(transactions: TransactionBase, db: db_dependency, request: Request):
+async def createTransaction(transactions: TransactionBase, db: db_dependency, request: Request, user_data = Depends(verify_token)):
     try:
         newTransaction = Transactions(
             user_id = transactions.user_id,
@@ -27,7 +30,7 @@ async def createTransaction(transactions: TransactionBase, db: db_dependency, re
 
     
 @transactionsRouter.get("/getTransactions")
-async def getTransactions(db: db_dependency):
+async def getTransactions(db: db_dependency, user_data = Depends(verify_token)):
     try:
         all_transactions = []
         fetchedTransactions = db.query(Transactions).all()
@@ -36,8 +39,8 @@ async def getTransactions(db: db_dependency):
         for tran in fetchedTransactions:
             single_transaction = {}
             fetchedProduct = db.query(Products).filter(Products.id == tran.product_id).first()
-            fetchedBuyer = db.query(Users).filter(Users.id == tran.user_id).first()
-            fetchedSeller = db.query(Users).filter(Users.id == fetchedProduct.user_id).first()
+            fetchedBuyer = db.query(Users).filter(Users.uuid == tran.user_id).first()
+            fetchedSeller = db.query(Users).filter(Users.uuid == fetchedProduct.user_id).first()
             single_transaction["id"] = tran.id
             single_transaction["buyer_id"] = tran.user_id
             single_transaction["buyer_name"] = fetchedBuyer.name
