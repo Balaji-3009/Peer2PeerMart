@@ -54,10 +54,37 @@ async def getProduct(productId: int, db: db_dependency, user_data = Depends(veri
         raise HTTPException(status_code=500, detail=str(e))
     
 @productsRouter.get("/getProducts")
-async def getProducts(db: db_dependency, user_data = Depends(verify_token)):
+async def getProducts(db: db_dependency,user_id:str):
     try:
         all_products = []
-        fetchedProducts = db.query(Products).all()
+        fetchedProducts = db.query(Products).filter(Products.user_id != user_id).all()
+        for prod in fetchedProducts:
+            single_product = {}
+            fetchedUserName = db.query(Users.name).filter(Users.uuid == prod.user_id).first()[0]
+            single_product["id"] = prod.id
+            single_product["name"] = prod.name
+            single_product["user_id"] = prod.user_id
+            single_product["user_name"] = fetchedUserName
+            single_product["price"] = prod.price
+            single_product["desc"] = prod.desc
+            single_product["created_at"] = prod.createdAt
+            single_product["updated_at"] = prod.updatedAt
+            all_products.append(single_product)
+        if not fetchedProducts:
+            raise HTTPException(status_code=404, detail="Products not found")
+        return {
+            "status": "success",
+            "message": "Products fetched successfully",
+            "data": all_products
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@productsRouter.get("/getMyProducts")
+async def getMyProducts(db: db_dependency,user_id:str, user_data = Depends(verify_token)):
+    try:
+        all_products = []
+        fetchedProducts = db.query(Products).filter(Products.user_id == user_id).all()
         for prod in fetchedProducts:
             single_product = {}
             fetchedUserName = db.query(Users.name).filter(Users.uuid == prod.user_id).first()[0]
