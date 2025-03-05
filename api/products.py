@@ -54,7 +54,7 @@ async def getProduct(productId: int, db: db_dependency, user_data = Depends(veri
         raise HTTPException(status_code=500, detail=str(e))
     
 @productsRouter.get("/getProducts")
-async def getProducts(db: db_dependency,user_id:str):
+async def getProducts(db: db_dependency,user_id:str, user_data = Depends(verify_token)):
     try:
         all_products = []
         fetchedProducts = db.query(Products).filter(Products.user_id != user_id).all()
