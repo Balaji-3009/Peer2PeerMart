@@ -16,6 +16,7 @@ import { Switch } from "../components/ui/switch";
 import { Slider } from "../components/ui/slider";
 import { Upload } from "lucide-react";
 import Sidebar from "../components/Sidebar";
+import { toast } from "react-toastify";
 
 export default function CreateProductPage() {
   const navigate = useNavigate();
@@ -43,10 +44,50 @@ export default function CreateProductPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting product data:", productData);
-    navigate("/products");
+
+    const uuid = localStorage.getItem("uuid");
+    const idToken = localStorage.getItem("idToken");
+
+    if (!uuid || !idToken) {
+      toast.error("User not authenticated.");
+      return;
+    }
+
+    const productDetails = {
+      name: productData.name,
+      user_id:uuid, // Ensure it's a number
+      price: productData.price,
+      desc: productData.description,
+    };
+
+    try {
+      const response = await fetch(
+        "https://peer2peermart.onrender.com/products/createProducts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify(productDetails),
+        }
+      );
+
+      const responseData = await response.json();
+      console.log("Product creation response:", responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || "Failed to create product");
+      }
+
+      toast.success("Product created successfully!");
+      navigate("/myproducts");
+    } catch (error) {
+      console.error("Error creating product:", error);
+      toast.error("Failed to create product. Please try again.");
+    }
   };
 
   return (

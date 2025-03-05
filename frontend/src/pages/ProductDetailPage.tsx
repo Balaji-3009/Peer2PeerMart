@@ -13,34 +13,43 @@ import Sidebar from "../components/Sidebar";
 import ReportSellerModal from "../components/ReportSellerModal";
 import img from "../assets/placeholder.png";
 
-// Dummy product details (you would typically fetch this from an API)
-const dummyProductDetails = {
-  id: 1,
-  name: "Smartphone X",
-  description: "Latest model with advanced features",
-  price: 799.99,
-  imageUrl: img,
-  longDescription:
-    "Experience the future of mobile technology with Smartphone X. Featuring a stunning 6.7-inch OLED display, 5G capabilities, and an AI-powered camera system, this device sets a new standard for smartphones. With its sleek design and powerful performance, Smartphone X is perfect for both work and play.",
-  specs: [
-    "6.7-inch OLED display",
-    "5G capable",
-    "Triple-lens camera system",
-    "256GB storage",
-    "All-day battery life",
-  ],
-};
-
 export default function ProductDetailPage() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const [product, setProduct] = useState(dummyProductDetails);
+  const { id: productId } = useParams();
+  const [product, setProduct] = useState(null);
   const [wishlistItems, setWishlistItems] = useState(0);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
-    setProduct({ ...dummyProductDetails, id: Number(id) });
-  }, [id]);
+    const fetchProductDetails = async () => {
+      try {
+        const idToken = localStorage.getItem("idToken");
+        const response = await fetch(
+          `https://peer2peermart.onrender.com/products/getProduct/${productId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.status === "success") {
+          setProduct({
+            id: data.data.id,
+            name: data.data.name,
+            description: data.data.desc || "No description available",
+            price: parseFloat(data.data.price) || 0,
+            imageUrl: img,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+      }
+    };
+
+    fetchProductDetails();
+  }, [productId]);
 
   const handleAddToWishlist = () => {
     setWishlistItems((prevItems) => prevItems + 1);
@@ -48,19 +57,25 @@ export default function ProductDetailPage() {
   };
 
   const handleReportSubmit = (reason) => {
-    // Here you would typically send the report to your backend
     console.log("Reporting seller with reason:", reason);
     toast.success("Seller reported successfully", { duration: 3000 });
     setIsReportModalOpen(false);
     navigate("/products");
   };
 
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6 relative">
       <Sidebar />
       <Toaster position="top-right" offset={50} />
 
-      {/* Wishlist Icon */}
       <div className="fixed top-4 right-4 z-50">
         <Button
           variant="ghost"
@@ -76,28 +91,24 @@ export default function ProductDetailPage() {
         </Button>
       </div>
 
-      <Card className="w-full max-w-4xl overflow-hidden">
+      <Card className="w-full max-w-2xl text-center">
         <CardHeader className="p-0">
-          <img src={product.imageUrl} alt={product.name} className="w-full h-64 object-cover" />
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-64 object-cover"
+          />
         </CardHeader>
         <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
-            <p className="text-2xl font-bold text-purple-600">
-              ${product.price.toFixed(2)}
-            </p>
-          </div>
-          <p className="text-gray-600 mb-6">{product.longDescription}</p>
-          <h2 className="text-xl font-semibold mb-2">Specifications:</h2>
-          <ul className="list-disc pl-5 mb-6">
-            {product.specs.map((spec, index) => (
-              <li key={index} className="text-gray-600">
-                {spec}
-              </li>
-            ))}
-          </ul>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">
+            {product.name}
+          </h1>
+          <p className="text-gray-600 mb-6">{product.description}</p>
+          <p className="text-2xl font-bold text-purple-600">
+            ${product.price.toFixed(2)}
+          </p>
         </CardContent>
-        <CardFooter className="bg-gray-50 p-6 flex flex-wrap gap-4">
+        <CardFooter className="bg-gray-50 p-6 flex flex-wrap gap-4 justify-center">
           <Button
             className="bg-purple-600 hover:bg-purple-700 text-white"
             onClick={handleAddToWishlist}
