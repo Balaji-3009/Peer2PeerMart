@@ -15,6 +15,8 @@ class ProductBase(BaseModel):
     user_id : str
     price : str
     desc : str
+    image: str
+    negotiable : int
     
 class TransactionBase(BaseModel):
     

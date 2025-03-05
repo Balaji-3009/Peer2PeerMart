@@ -40,6 +40,8 @@ class Products(Base):
     user_id = Column(String, ForeignKey("entry.uuid"))
     price = Column(String)
     desc = Column(String)
+    image = Column(String)
+    negotiable = Column(Integer)
     createdAt = Column(DateTime, default=func.now())
     updatedAt = Column(DateTime, default=func.now(), onupdate=func.now())
     

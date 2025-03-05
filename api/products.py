@@ -15,7 +15,9 @@ async def createProduct(products: ProductBase, db: db_dependency, request: Reque
             name = products.name,
             user_id = products.user_id,
             price = products.price,
-            desc = products.desc
+            desc = products.desc,
+            image = products.image,
+            negotiable = products.negotiable
         )
         db.add(newProduct)
         db.commit()
@@ -43,6 +45,8 @@ async def getProduct(productId: int, db: db_dependency, user_data = Depends(veri
         single_product["user_name"] = fetchedUserName
         single_product["price"] = prod.price
         single_product["desc"] = prod.desc
+        single_product["image"] = prod.image
+        single_product["negotiable"] = prod.negotiable
         single_product["created_at"] = prod.createdAt
         single_product["updated_at"] = prod.updatedAt
         return {
@@ -67,6 +71,8 @@ async def getProducts(db: db_dependency,user_id:str, user_data = Depends(verify_
             single_product["user_name"] = fetchedUserName
             single_product["price"] = prod.price
             single_product["desc"] = prod.desc
+            single_product["image"] = prod.image
+            single_product["negotiable"] = prod.negotiable
             single_product["created_at"] = prod.createdAt
             single_product["updated_at"] = prod.updatedAt
             all_products.append(single_product)
@@ -94,6 +100,8 @@ async def getMyProducts(db: db_dependency,user_id:str, user_data = Depends(verif
             single_product["user_name"] = fetchedUserName
             single_product["price"] = prod.price
             single_product["desc"] = prod.desc
+            single_product["image"] = prod.image
+            single_product["negotiable"] = prod.negotiable
             single_product["created_at"] = prod.createdAt
             single_product["updated_at"] = prod.updatedAt
             all_products.append(single_product)
