@@ -9,10 +9,11 @@ import {
   ChevronLeft,
   ClipboardList,
   Home,
-  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Toaster } from "sonner";
+import { NavBar } from "./NavBar"; // Import the NavBar component
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -29,11 +30,6 @@ const Sidebar = () => {
   }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-
-  const handleLogout = () => {
-    navigate("/");
-    localStorage.removeItem("uuid");
-  };
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: "Home", href: "/products" },
@@ -61,17 +57,10 @@ const Sidebar = () => {
 
   return (
     <>
+      <Toaster richColors position="top-right" />
+
       {/* Top Navbar */}
-      <nav className="fixed top-0 left-0 w-full bg-white shadow-md py-3 px-6 flex justify-between items-center z-30">
-        <h1 className="text-xl font-bold text-purple-600">P2P Mart</h1>
-        <Button
-          variant="ghost"
-          className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition"
-          onClick={handleLogout}
-        >
-          Logout <LogOut className="h-5 w-5 ml-2" />
-        </Button>
-      </nav>
+      <NavBar />
 
       {/* Sidebar for Desktop */}
       {!isMobile ? (

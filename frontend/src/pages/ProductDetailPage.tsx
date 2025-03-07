@@ -37,10 +37,11 @@ export default function ProductDetailPage() {
           setProduct({
             id: data.data.id,
             name: data.data.name,
+            user_name: data.data.user_name,
             description: data.data.desc || "No description available",
             price: parseFloat(data.data.price) || 0,
             imageUrl: data.data.image,
-            longDescription: "Detailed description is currently unavailable.",
+            longDescription: data.data.desc || "No description available",
             specs: data.data.specs || [],
           });
         }
@@ -143,6 +144,7 @@ export default function ProductDetailPage() {
               ${product.price.toFixed(2)}
             </p>
           </div>
+          <p className="text-2xl text-gray-600 mb-6  text-purple-600">{product.user_name}</p>
           <p className="text-gray-600 mb-6">{product.longDescription}</p>
           {product.specs.length > 0 && (
             <>

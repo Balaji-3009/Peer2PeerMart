@@ -188,7 +188,7 @@ export default function CreateProductPage() {
                 </Label>
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label className="text-violet-700 font-semibold">
                   Condition Rating
                 </Label>
@@ -205,7 +205,7 @@ export default function CreateProductPage() {
                 <div className="text-center font-semibold text-violet-700">
                   {productData.condition} / 10
                 </div>
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="description" className="text-violet-700">
