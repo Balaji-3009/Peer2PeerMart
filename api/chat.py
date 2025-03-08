@@ -25,12 +25,12 @@ def create_chat(chats:ChatBase, db: db_dependency, request: Request, user_data =
     return {"chat_id": chat.chat_id}
 
 @chatRouter.get("/messages/{chat_id}")
-def get_messages(chat_id: int, db: db_dependency, user_data = Depends(verify_token)):
+def get_messages(chat_id: int, db: db_dependency):
     messages = db.query(Message).filter_by(chat_id=chat_id).order_by(Message.created_at).all()
     return [{"sender_id": m.sender_id, "content": m.content, "created_at": m.created_at} for m in messages]
 
 @chatRouter.websocket("/ws/{chat_id}/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: str, db: db_dependency, user_data = Depends(verify_token)):
+async def websocket_endpoint(websocket: WebSocket, chat_id: int, user_id: str, db: db_dependency):
     await websocket.accept()
 
     if chat_id not in active_connections:
