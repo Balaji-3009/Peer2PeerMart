@@ -51,7 +51,10 @@ export default function ReceivedOrders() {
               name: order.product_name,
               price: order.price,
               buyer: order.buyer_name,
-              sold: order.sold || false,
+              seller_id: order.seller_id,
+              buyer_id: order.buyer_id,
+              product_id: order.product_id,
+              sold: order.confirmation || false,
             }))
           );
         } else {

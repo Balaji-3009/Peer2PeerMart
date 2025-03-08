@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
@@ -11,14 +10,12 @@ export default function ChatWindow({ item, onClose, position }) {
   const [socket, setSocket] = useState(null);
   const [chatId, setChatId] = useState(null);
   const uuid = localStorage.getItem("uuid");
-
+  const idToken = localStorage.getItem("idToken");
   useEffect(() => {
     setMessages([]);
-
+    console.log(item);
     const createChat = async () => {
       try {
-        const idToken = localStorage.getItem("idToken");
-
         const response = await fetch(
           "https://peer2peermart.onrender.com/chats/create_chat/",
           {
@@ -38,6 +35,7 @@ export default function ChatWindow({ item, onClose, position }) {
         const data = await response.json();
         if (data.chat_id) {
           setChatId(data.chat_id);
+          console.log(chatId);
         }
       } catch (error) {
         console.error("Error creating chat:", error);
@@ -50,26 +48,74 @@ export default function ChatWindow({ item, onClose, position }) {
   useEffect(() => {
     if (!chatId || !uuid) return;
 
-    const ws = new WebSocket(
-      `wss://peer2peermart.onrender.com/ws/${chatId}/${uuid}`
-    );
+    // Fetch previous messages
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(
+          `https://peer2peermart.onrender.com/chats/messages/${chatId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
 
-    ws.onopen = () => console.log("Connected to WebSocket");
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setMessages((prev) => [...prev, data]);
+        const data = await response.json();
+        setMessages(data); // Set fetched messages
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
     };
-    ws.onclose = () => console.log("Disconnected from WebSocket");
 
-    setSocket(ws);
+    fetchMessages();
 
-    return () => ws.close();
+    let ws;
+
+    const connectWebSocket = () => {
+      ws = new WebSocket(
+        `wss://peer2peermart.onrender.com/chats/ws/${chatId}/${uuid}`
+      );
+
+      ws.onopen = () => console.log("Connected to WebSocket");
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setMessages((prev) => [...prev, data]);
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      ws.onclose = (event) => {
+        console.log("Disconnected from WebSocket", event.code, event.reason);
+        // Attempt to reconnect after 3 seconds if closed unexpectedly
+        if (!event.wasClean) {
+          setTimeout(connectWebSocket, 3000);
+        }
+      };
+
+      setSocket(ws);
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (ws) ws.close();
+    };
   }, [chatId, uuid]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (socket && inputMessage.trim()) {
       const messageData = {
+        sender_id: uuid, // Ensure sender_id is included
         content: inputMessage,
       };
       socket.send(JSON.stringify(messageData));
@@ -101,12 +147,12 @@ export default function ChatWindow({ item, onClose, position }) {
           <div
             key={index}
             className={`mb-2 ${
-              message.sender_id === item.buyer_id ? "text-right" : "text-left"
+              message.sender_id === uuid ? "text-right" : "text-left"
             }`}
           >
             <span
               className={`inline-block p-2 rounded-lg ${
-                message.sender_id === item.buyer_id
+                message.sender_id === uuid
                   ? "bg-purple-600 text-white"
                   : "bg-gray-200 text-gray-800"
               }`}
