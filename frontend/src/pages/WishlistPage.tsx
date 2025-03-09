@@ -1,34 +1,26 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { Trash2, MessageCircle } from "lucide-react";
-import ChatWindow from "../components/ChatWindow";
-import Sidebar from "../components/Sidebar";
-import { Toaster, toast } from "sonner";
+import ChatWindow from "../components/chatWindow";
+import Sidebar from "../components/SideBar";
 
 export default function WishlistPage() {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [chatItem, setChatItem] = useState(null);
-  const [chatPosition, setChatPosition] = useState({ top: 0, left: 0 });
-  const navigate = useNavigate();
-  const chatButtonRefs = useRef({});
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchWishlist = async () => {
+      setIsLoading(true);
       try {
         const idToken = localStorage.getItem("idToken");
         const userId = localStorage.getItem("uuid");
 
         if (!userId) {
-          toast.error("User ID not found. Please log in.");
+          console.error("User ID not found. Please log in.");
           return;
         }
 
@@ -51,116 +43,144 @@ export default function WishlistPage() {
               productName: item.product_name,
               price: item.price,
               sellerName: item.seller_name,
-              imageUrl: item.img_url || "", // Use img_url from API
+              imageUrl: item.img_url || "",
               seller_id: item.seller_id,
               buyer_id: item.buyer_id,
               product_id: item.product_id,
             }))
           );
         } else {
-          toast.error("Failed to fetch wishlist.");
+          console.error("Failed to fetch wishlist.");
         }
       } catch (error) {
         console.error("Error fetching wishlist:", error);
-        toast.error("An error occurred. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     };
+
     fetchWishlist();
   }, []);
 
-  const removeItem = (id) => {
-    setWishlistItems((items) => items.filter((item) => item.id !== id));
+  const removeItem = async (id) => {
+    try {
+      const idToken = localStorage.getItem("idToken");
+
+      // Here you would typically call an API to remove the item
+      // For now, we'll just update the UI
+      setWishlistItems((items) => items.filter((item) => item.id !== id));
+
+      // Show a toast notification
+      showToast("Item removed from wishlist");
+    } catch (error) {
+      console.error("Error removing item:", error);
+      showToast("Failed to remove item", true);
+    }
   };
 
-  const toggleChat = (item, event) => {
-    const buttonRect = chatButtonRefs.current[item.id]?.getBoundingClientRect();
-    if (!buttonRect) return;
-
-    const newPosition = {
-      top: buttonRect.top + window.scrollY,
-      left: buttonRect.right + window.scrollX + 10,
-    };
-
+  const toggleChat = (item) => {
     setChatItem(chatItem && chatItem.id === item.id ? null : item);
-    setChatPosition(newPosition);
+  };
+
+  const showToast = (message, isError = false) => {
+    // Simple toast implementation
+    const toast = document.createElement("div");
+    toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${
+      isError ? "bg-red-500" : "bg-green-500"
+    } shadow-lg z-50 transition-opacity duration-300`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 3000);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative mt-10">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative">
       <Sidebar />
-      <Toaster position="top-right" />
-
-      <Card className="w-full max-w-4xl overflow-hidden">
-        <CardHeader className="bg-purple-600 text-white p-6">
+      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md overflow-hidden mt-16">
+        <div className="bg-purple-600 text-white p-6">
           <h1 className="text-3xl font-bold">Your Wishlist</h1>
-        </CardHeader>
+        </div>
 
-        <CardContent className="p-6">
-          {wishlistItems.length === 0 ? (
-            <p className="text-gray-600 text-center">Your wishlist is empty.</p>
+        <div className="p-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-40">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+            </div>
+          ) : wishlistItems.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg mb-6">
+                Your wishlist is empty.
+              </p>
+              <button
+                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                onClick={() => (window.location.href = "/products")}
+              >
+                Browse Products
+              </button>
+            </div>
           ) : (
             <ul className="divide-y divide-gray-200">
               {wishlistItems.map((item) => (
-                <li key={item.id} className="py-4 flex items-center space-x-4">
-                  <img
-                    src={item.imageUrl || "https://via.placeholder.com/150"}
-                    alt={item.productName}
-                    className="w-16 h-16 object-cover rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {item.productName}
-                    </h3>
-                    <p className="text-gray-600">Seller: {item.sellerName}</p>
-                    <p className="text-gray-600">${item.price}</p>
+                <li
+                  key={item.id}
+                  className="py-4 flex items-center space-x-4 hover:bg-gray-50 rounded-lg p-2 transition-colors"
+                >
+                  {/* Make the product item clickable */}
+                  <div
+                    className="flex-1 flex items-center space-x-4 cursor-pointer"
+                    onClick={() => navigate(`/product/${item.product_id}`)}
+                  >
+                    <img
+                      src={item.imageUrl || "https://via.placeholder.com/150"}
+                      alt={item.productName}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {item.productName}
+                      </h3>
+                      <p className="text-gray-600">Seller: {item.sellerName}</p>
+                      <p className="text-purple-600 font-medium">
+                        ${item.price}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-purple-600 hover:text-purple-700"
-                      onClick={(e) => toggleChat(item, e)}
-                      ref={(el) => (chatButtonRefs.current[item.id] = el)}
+                    <button
+                      className="text-purple-600 hover:text-purple-700 p-2 rounded-full hover:bg-purple-100 transition-colors"
+                      onClick={() => toggleChat(item)}
                     >
                       <MessageCircle className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-700"
+                    </button>
+                    <button
+                      className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
                       onClick={() => removeItem(item.id)}
                     >
                       <Trash2 className="h-5 w-5" />
-                    </Button>
+                    </button>
                   </div>
                 </li>
               ))}
             </ul>
           )}
-        </CardContent>
+        </div>
 
-        <CardFooter className="bg-gray-50 p-6 flex justify-between items-center">
-          <Button
-            variant="outline"
-            className="border-purple-600 text-purple-600 hover:bg-purple-100"
-            onClick={() => navigate("/products")}
+        <div className="bg-gray-50 p-6 flex justify-between items-center">
+          <button
+            className="border border-purple-600 text-purple-600 px-6 py-2 rounded-lg hover:bg-purple-50 transition-colors"
+            onClick={() => (window.location.href = "/products")}
           >
             Continue Shopping
-          </Button>
-        </CardFooter>
-      </Card>
+          </button>
+        </div>
+      </div>
 
       {chatItem && (
-        <ChatWindow
-          item={{
-            ...chatItem,
-            buyer_id: chatItem.buyer_id,
-            seller_id: chatItem.seller_id,
-            product_id: chatItem.product_id,
-          }}
-          onClose={() => setChatItem(null)}
-          position={chatPosition}
-        />
+        <ChatWindow item={chatItem} onClose={() => setChatItem(null)} />
       )}
     </div>
   );
