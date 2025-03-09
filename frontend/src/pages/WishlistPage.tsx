@@ -12,7 +12,6 @@ import { Button } from "../components/ui/button";
 import { Trash2, MessageCircle } from "lucide-react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
-import placeholderImg from "../assets/placeholder.png";
 import { Toaster, toast } from "sonner";
 
 export default function WishlistPage() {
@@ -52,7 +51,7 @@ export default function WishlistPage() {
               productName: item.product_name,
               price: item.price,
               sellerName: item.seller_name,
-              imageUrl: placeholderImg,
+              imageUrl: item.img_url || "", // Use img_url from API
               seller_id: item.seller_id,
               buyer_id: item.buyer_id,
               product_id: item.product_id,
@@ -104,7 +103,7 @@ export default function WishlistPage() {
               {wishlistItems.map((item) => (
                 <li key={item.id} className="py-4 flex items-center space-x-4">
                   <img
-                    src={item.imageUrl}
+                    src={item.imageUrl || "https://via.placeholder.com/150"}
                     alt={item.productName}
                     className="w-16 h-16 object-cover rounded-lg"
                   />

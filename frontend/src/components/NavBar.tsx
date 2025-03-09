@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -107,17 +105,19 @@ export const NavBar = () => {
                     {userData.regNo}
                   </p>
                 </div>
+                <div className="mt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition"
+                    onClick={handleLogout}
+                  >
+                    Logout <LogOut className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
         </div>
-        <Button
-          variant="ghost"
-          className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition"
-          onClick={handleLogout}
-        >
-          Logout <LogOut className="h-5 w-5 ml-2" />
-        </Button>
       </div>
     </nav>
   );

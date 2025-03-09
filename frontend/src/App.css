@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {}
+@layer base {
+}
 
 @layer base {
   * {
@@ -10,5 +11,28 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+.product-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%; /* Ensure it takes full width */
+}
+
+.product-title:hover span {
+  animation: marquee 10s linear;
+}
+
+.product-title span {
+  display: inline-block;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
   }
 }

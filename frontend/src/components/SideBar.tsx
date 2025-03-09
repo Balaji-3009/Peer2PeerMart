@@ -82,7 +82,7 @@ const Sidebar = () => {
             )}
           </Button>
 
-          <div className="flex flex-col items-center pt-4">
+          <div className="flex flex-col items-center pt-4 mt-7">
             {menuItems.map((item, index) => (
               <a
                 key={index}

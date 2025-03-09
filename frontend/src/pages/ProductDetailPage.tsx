@@ -141,10 +141,12 @@ export default function ProductDetailPage() {
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
             <p className="text-2xl font-bold text-purple-600">
-              ${product.price.toFixed(2)}
+              &#8377;{product.price.toFixed(2)}
             </p>
           </div>
-          <p className="text-2xl text-gray-600 mb-6  text-purple-600">{product.user_name}</p>
+          <p className="text-2xl text-gray-600 mb-6  text-purple-600">
+            {product.user_name}
+          </p>
           <p className="text-gray-600 mb-6">{product.longDescription}</p>
           {product.specs.length > 0 && (
             <>

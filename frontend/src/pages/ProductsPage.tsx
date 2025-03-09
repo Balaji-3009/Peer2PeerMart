@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -19,17 +17,21 @@ import {
   PopoverTrigger,
 } from "../components/ui/popover";
 import { Slider } from "../components/ui/slider";
-import { Label } from "../components/ui/label";
 
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 100]);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    filterProducts();
+  }, [searchTerm, priceRange, products]); // Re-run filter when searchTerm, priceRange, or products change
 
   const fetchProducts = async () => {
     try {
@@ -39,9 +41,7 @@ export default function ProductsPage() {
         console.error("No ID token found in localStorage");
         return;
       }
-      console.log(
-        `https://peer2peermart.onrender.com/products/getProducts?user_id=${uuid})`
-      );
+
       const response = await fetch(
         `https://peer2peermart.onrender.com/products/getProducts?user_id=${uuid}`,
         {
@@ -51,10 +51,11 @@ export default function ProductsPage() {
           },
         }
       );
+
       const data = await response.json();
       if (data.status === "success") {
         const formattedProducts = data.data
-          .filter((product) => product.name && product.price) // Filter out incomplete products
+          .filter((product) => product.name && product.price) // Remove incomplete products
           .map((product) => ({
             id: product.id,
             name: product.name || "Unnamed Product",
@@ -62,31 +63,35 @@ export default function ProductsPage() {
             image: product.image,
             price: parseFloat(product.price) || 0,
           }));
+
         setProducts(formattedProducts);
-        console.log(formattedProducts);
+        setFilteredProducts(formattedProducts); // Initialize filteredProducts with all products
+
+        // Dynamically set the max price for the slider
+        const maxPrice = Math.max(...formattedProducts.map((p) => p.price), 100);
+        setPriceRange([0, maxPrice]);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
 
-  const handleSearch = (term) => {
-    filterProducts(term, priceRange);
-  };
-
-  const handlePriceFilter = (range) => {
-    setPriceRange(range);
-    filterProducts(searchTerm, range);
-  };
-
-  const filterProducts = (term, range) => {
+  const filterProducts = () => {
     const filtered = products.filter(
       (product) =>
-        product.name.toLowerCase().includes(term.toLowerCase()) &&
-        product.price >= range[0] &&
-        product.price <= range[1]
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        product.price >= priceRange[0] &&
+        product.price <= priceRange[1]
     );
-    setProducts(filtered);
+    setFilteredProducts(filtered);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handlePriceChange = (range) => {
+    setPriceRange(range);
   };
 
   return (
@@ -99,20 +104,16 @@ export default function ProductsPage() {
           </h1>
           <div className="flex justify-center">
             <div className="relative w-full max-w-xl">
+              {/* Search Bar */}
               <Input
                 type="text"
                 placeholder="Search for amazing products..."
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  handleSearch(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch(searchTerm);
-                }}
+                onChange={handleSearchChange}
                 className="pr-20 rounded-full"
               />
               <div className="absolute right-0 top-0 bottom-0 flex">
+                {/* Filter Popover */}
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -127,58 +128,62 @@ export default function ProductsPage() {
                       <h4 className="font-medium">Filter by Price</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span>${priceRange[0]}</span>
-                          <span>${priceRange[1]}</span>
+                          <span>&#8377;{priceRange[0]}</span>
+                          <span>&#8377;{priceRange[1]}</span>
                         </div>
                         <Slider
-                          defaultValue={[0, 100]}
-                          max={100}
+                          max={priceRange[1]} // Set max dynamically
                           step={1}
                           value={priceRange}
-                          onValueChange={handlePriceFilter}
+                          onValueChange={handlePriceChange}
                           className="my-4"
                         />
                       </div>
                     </div>
                   </PopoverContent>
                 </Popover>
-                <Button
-                  onClick={() => handleSearch(searchTerm)}
-                  className="rounded-full"
-                >
+
+                {/* Search Button */}
+                <Button className="rounded-full">
                   <Search className="h-5 w-5" />
                 </Button>
               </div>
             </div>
           </div>
 
+          {/* Product Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product) => (
-              <Card key={product.id}>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
-                </CardHeader>
-                <CardContent>
-                  <img
-                    src={product.image || img}
-                    alt={product.name}
-                    className="w-full h-48 object-cover rounded-md mb-4"
-                  />
-                  <p className="text-sm text-gray-600">{product.description}</p>
-                </CardContent>
-                <CardFooter className="justify-between items-center">
-                  <span className="text-base font-medium">
-                    ${product.price.toFixed(2)}
-                  </span>
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/product/${product.id}`)}
-                  >
-                    View Details
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <Card key={product.id}>
+                  <CardHeader>
+                    <h3 className="text-lg font-semibold">{product.name}</h3>
+                  </CardHeader>
+                  <CardContent>
+                    <img
+                      src={product.image || img}
+                      alt={product.name}
+                      className="w-full h-48 object-cover rounded-md mb-4"
+                    />
+                  </CardContent>
+                  <CardFooter className="justify-between items-center">
+                    <span className="text-base font-medium">
+                      &#8377;{product.price.toFixed(2)}
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/product/${product.id}`)}
+                    >
+                      View Details
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <p className="text-center text-gray-500 col-span-3">
+                No products found.
+              </p>
+            )}
           </div>
         </div>
       </div>
