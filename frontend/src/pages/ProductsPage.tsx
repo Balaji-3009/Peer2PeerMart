@@ -95,7 +95,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex mt-10">
+    <div className="min-h-screen bg-gray-100 flex mt-24">
       <Sidebar />
       <div className="flex-1 p-6">
         <div className="space-y-8 w-full max-w-4xl mx-auto">

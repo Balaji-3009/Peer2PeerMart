@@ -63,7 +63,7 @@ export const NavBar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white shadow-md py-3 px-6 flex justify-between items-center z-30">
+    <nav className="fixed top-0 left-0 w-full bg-grey shadow-md py-3 px-6 flex justify-between items-center z-30 ">
       <h1 className="text-xl font-bold text-purple-600">P2P Mart</h1>
       <div className="flex items-center gap-4">
         {/* Profile Icon and Dropdown */}
@@ -74,11 +74,11 @@ export const NavBar = () => {
         >
           <button className="flex items-center gap-2 bg-purple-100 p-2 rounded-full hover:bg-purple-200 transition">
             <User className="h-5 w-5 text-purple-600" />
-            {userData && (
+            {/* {userData && (
               <span className="text-purple-600 font-medium">
                 Welcome, {userData.name.split(" ")[0]}
               </span>
-            )}
+            )} */}
           </button>
 
           {/* Profile Dropdown */}

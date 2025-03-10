@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import {
   Card,
@@ -92,7 +91,7 @@ export default function ReceivedOrders() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative mt-10">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative  mt-24">
       <Sidebar />
       <Toaster position="top-right" />
 
@@ -110,11 +109,17 @@ export default function ReceivedOrders() {
                   key={order.id}
                   className="py-4 flex items-center justify-between"
                 >
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800">
+                  <div
+                    className="flex-1 "
+                    onClick={() => navigate(`/product/${order.product_id}`)}
+                  >
+                    <h3
+                      className="text-lg font-semibold text-gray-800 cursor-pointer"
+                      onClick={() => navigate(`/product/${order.product_id}`)}
+                    >
                       {order.name}
                     </h3>
-                    <p className="text-gray-600">${order.price}</p>
+                    <p className="text-gray-600">&#x20B9;{order.price}</p>
                     <p className="text-sm text-gray-500">
                       Buyer: {order.buyer}
                     </p>

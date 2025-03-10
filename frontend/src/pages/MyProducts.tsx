@@ -83,7 +83,7 @@ export default function MyProducts() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex mt-10">
+    <div className="min-h-screen bg-gray-100 flex  mt-24">
       <Sidebar />
       <div className="flex-1 p-6">
         <Card className="w-full max-w-5xl mx-auto shadow-md">
@@ -144,7 +144,7 @@ export default function MyProducts() {
                           <h3 className="text-xl font-semibold text-gray-800 mb-1">{product.name}</h3>
                           <div className="flex items-center gap-2 mb-3">
                             <span className="text-purple-600 font-medium text-lg">
-                              ${Number.parseFloat(product.price).toFixed(2)}
+                            &#x20B9;{Number.parseFloat(product.price).toFixed(2)}
                             </span>
                             {product.negotiable && (
                               <span className="text-xs bg-purple-50 text-purple-600 border border-purple-200 px-2 py-0.5 rounded-full">

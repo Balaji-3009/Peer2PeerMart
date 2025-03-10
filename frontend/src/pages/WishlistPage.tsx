@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { Trash2, MessageCircle } from "lucide-react";
@@ -98,9 +96,9 @@ export default function WishlistPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative  mt-24">
       <Sidebar />
-      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md overflow-hidden mt-16">
+      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md overflow-hidden ">
         <div className="bg-purple-600 text-white p-6">
           <h1 className="text-3xl font-bold">Your Wishlist</h1>
         </div>
@@ -134,18 +132,13 @@ export default function WishlistPage() {
                     className="flex-1 flex items-center space-x-4 cursor-pointer"
                     onClick={() => navigate(`/product/${item.product_id}`)}
                   >
-                    <img
-                      src={item.imageUrl || "https://via.placeholder.com/150"}
-                      alt={item.productName}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800">
                         {item.productName}
                       </h3>
                       <p className="text-gray-600">Seller: {item.sellerName}</p>
                       <p className="text-purple-600 font-medium">
-                        ${item.price}
+                        &#x20B9;{item.price}
                       </p>
                     </div>
                   </div>
