@@ -130,7 +130,7 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white-100  mt-24">
+    <div className="min-h-screen flex bg-gray-100  pt-24">
       <Sidebar />
       <div className="flex-1 p-10">
         <Card className="w-full max-w-2xl mx-auto shadow-lg border border-violet-300">

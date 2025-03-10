@@ -68,7 +68,10 @@ export default function ProductsPage() {
         setFilteredProducts(formattedProducts); // Initialize filteredProducts with all products
 
         // Dynamically set the max price for the slider
-        const maxPrice = Math.max(...formattedProducts.map((p) => p.price), 100);
+        const maxPrice = Math.max(
+          ...formattedProducts.map((p) => p.price),
+          100
+        );
         setPriceRange([0, maxPrice]);
       }
     } catch (error) {
@@ -95,7 +98,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex mt-24">
+    <div className="min-h-screen bg-gray-100 flex pt-28">
       <Sidebar />
       <div className="flex-1 p-6">
         <div className="space-y-8 w-full max-w-4xl mx-auto">

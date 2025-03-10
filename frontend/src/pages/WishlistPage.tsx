@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { Trash2, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MessageCircle, XCircle } from "lucide-react";
 import ChatWindow from "../components/chatWindow";
 import Sidebar from "../components/SideBar";
+import { Toaster, toast } from "sonner";
 
 export default function WishlistPage() {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [chatItem, setChatItem] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -45,13 +46,15 @@ export default function WishlistPage() {
               seller_id: item.seller_id,
               buyer_id: item.buyer_id,
               product_id: item.product_id,
+              confirmation: item.confirmation,
             }))
           );
+          toast.success("Wishlist fetched successfully");
         } else {
-          console.error("Failed to fetch wishlist.");
+          toast.error("Failed to fetch wishlist");
         }
       } catch (error) {
-        console.error("Error fetching wishlist:", error);
+        toast.error("Error fetching wishlist");
       } finally {
         setIsLoading(false);
       }
@@ -60,49 +63,43 @@ export default function WishlistPage() {
     fetchWishlist();
   }, []);
 
-  const removeItem = async (id) => {
+  const cancelProduct = async (tranId) => {
     try {
       const idToken = localStorage.getItem("idToken");
+      const url = `https://peer2peermart.onrender.com/transactions/updateTransaction?tranId=${tranId}&tranStatus=3`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
 
-      // Here you would typically call an API to remove the item
-      // For now, we'll just update the UI
-      setWishlistItems((items) => items.filter((item) => item.id !== id));
+      const data = await response.json();
 
-      // Show a toast notification
-      showToast("Item removed from wishlist");
+      if (data.status === "success") {
+        toast.success("Product cancelled successfully");
+        setWishlistItems((items) =>
+          items.map((item) =>
+            item.id === tranId ? { ...item, confirmation: 3 } : item
+          )
+        );
+      } else {
+        toast.error("Failed to cancel product");
+      }
     } catch (error) {
-      console.error("Error removing item:", error);
-      showToast("Failed to remove item", true);
+      toast.error("Failed to cancel product");
     }
   };
 
-  const toggleChat = (item) => {
-    setChatItem(chatItem && chatItem.id === item.id ? null : item);
-  };
-
-  const showToast = (message, isError = false) => {
-    // Simple toast implementation
-    const toast = document.createElement("div");
-    toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${
-      isError ? "bg-red-500" : "bg-green-500"
-    } shadow-lg z-50 transition-opacity duration-300`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.opacity = "0";
-      setTimeout(() => document.body.removeChild(toast), 300);
-    }, 3000);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative  mt-24">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative pt-24">
       <Sidebar />
-      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md overflow-hidden ">
+      <Toaster position="top-right" />
+      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md overflow-hidden">
         <div className="bg-purple-600 text-white p-6">
           <h1 className="text-3xl font-bold">Your Wishlist</h1>
         </div>
-
         <div className="p-6">
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
@@ -115,7 +112,7 @@ export default function WishlistPage() {
               </p>
               <button
                 className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                onClick={() => (window.location.href = "/products")}
+                onClick={() => navigate("/products")}
               >
                 Browse Products
               </button>
@@ -125,35 +122,38 @@ export default function WishlistPage() {
               {wishlistItems.map((item) => (
                 <li
                   key={item.id}
-                  className="py-4 flex items-center space-x-4 hover:bg-gray-50 rounded-lg p-2 transition-colors"
+                  className={`py-4 flex items-center space-x-4 p-2 transition-opacity ${
+                    item.confirmation === 3 ? "opacity-40" : "hover:bg-gray-50"
+                  }`}
                 >
-                  {/* Make the product item clickable */}
-                  <div
-                    className="flex-1 flex items-center space-x-4 cursor-pointer"
-                    onClick={() => navigate(`/product/${item.product_id}`)}
-                  >
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {item.productName}
-                      </h3>
-                      <p className="text-gray-600">Seller: {item.sellerName}</p>
-                      <p className="text-purple-600 font-medium">
-                        &#x20B9;{item.price}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {item.productName}
+                    </h3>
+                    <p className="text-gray-600">Seller: {item.sellerName}</p>
+                    <p className="text-purple-600 font-medium">
+                      &#x20B9;{item.price}
+                    </p>
+                    {item.confirmation === 3 && (
+                      <p className="text-gray-500 font-medium">
+                        Cancelled by You
                       </p>
-                    </div>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button
-                      className="text-purple-600 hover:text-purple-700 p-2 rounded-full hover:bg-purple-100 transition-colors"
-                      onClick={() => toggleChat(item)}
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                    </button>
+                    {item.confirmation !== 3 && (
+                      <button
+                        className="text-purple-600 hover:text-purple-700 p-2 rounded-full hover:bg-purple-100 transition-colors"
+                        onClick={() => setChatItem(item)}
+                      >
+                        <MessageCircle className="h-5 w-5" />
+                      </button>
+                    )}
                     <button
                       className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => cancelProduct(item.id)}
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <XCircle className="h-5 w-5" />
                     </button>
                   </div>
                 </li>
@@ -161,17 +161,7 @@ export default function WishlistPage() {
             </ul>
           )}
         </div>
-
-        <div className="bg-gray-50 p-6 flex justify-between items-center">
-          <button
-            className="border border-purple-600 text-purple-600 px-6 py-2 rounded-lg hover:bg-purple-50 transition-colors"
-            onClick={() => (window.location.href = "/products")}
-          >
-            Continue Shopping
-          </button>
-        </div>
       </div>
-
       {chatItem && (
         <ChatWindow item={chatItem} onClose={() => setChatItem(null)} />
       )}

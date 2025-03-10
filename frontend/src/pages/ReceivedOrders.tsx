@@ -6,7 +6,7 @@ import {
   CardHeader,
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Trash2, MessageCircle, CheckCircle } from "lucide-react";
+import { Trash2, MessageCircle, CheckCircle, XCircle } from "lucide-react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -52,7 +52,7 @@ export default function ReceivedOrders() {
               seller_id: order.seller_id,
               buyer_id: order.buyer_id,
               product_id: order.product_id,
-              sold: order.confirmation || false,
+              confirmation: order.confirmation,
             }))
           );
         } else {
@@ -67,31 +67,53 @@ export default function ReceivedOrders() {
     fetchOrders();
   }, []);
 
-  const removeOrder = (id) => {
-    setOrders((items) => items.filter((item) => item.id !== id));
+  const updateTransaction = async (tranId, status) => {
+    try {
+      const idToken = localStorage.getItem("idToken");
+      const url = `https://peer2peermart.onrender.com/transactions/updateTransaction?tranId=${tranId}&tranStatus=${status}`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        toast.success(
+          status === 2 ? "Product accepted successfully" : "Product rejected"
+        );
+        setOrders((items) =>
+          items.map((item) =>
+            item.id === tranId ? { ...item, confirmation: status } : item
+          )
+        );
+      } else {
+        toast.error("Failed to update transaction");
+      }
+    } catch (error) {
+      console.error("Error updating transaction:", error);
+      toast.error("Failed to update transaction");
+    }
   };
+  const toggleChat = (order, event) => {
+    const buttonRef = chatButtonRefs.current[order.id];
 
-  const markAsSold = (id) => {
-    setOrders((items) =>
-      items.map((item) => (item.id === id ? { ...item, sold: true } : item))
-    );
-  };
+    if (buttonRef) {
+      const rect = buttonRef.getBoundingClientRect();
+      setChatPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+      });
+    }
 
-  const toggleChat = (item, event) => {
-    const buttonRect = chatButtonRefs.current[item.id]?.getBoundingClientRect();
-    if (!buttonRect) return;
-
-    const newPosition = {
-      top: buttonRect.top + window.scrollY,
-      left: buttonRect.right + window.scrollX + 10,
-    };
-
-    setChatItem(chatItem && chatItem.id === item.id ? null : item);
-    setChatPosition(newPosition);
+    setChatItem(order);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative  mt-24">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative pt-24">
       <Sidebar />
       <Toaster position="top-right" />
 
@@ -107,22 +129,30 @@ export default function ReceivedOrders() {
               {orders.map((order) => (
                 <li
                   key={order.id}
-                  className="py-4 flex items-center justify-between"
+                  className={`py-4 flex items-center justify-between ${
+                    order.confirmation ? "opacity-50 pointer-events-none" : ""
+                  }`}
                 >
                   <div
-                    className="flex-1 "
+                    className="flex-1"
                     onClick={() => navigate(`/product/${order.product_id}`)}
                   >
-                    <h3
-                      className="text-lg font-semibold text-gray-800 cursor-pointer"
-                      onClick={() => navigate(`/product/${order.product_id}`)}
-                    >
+                    <h3 className="text-lg font-semibold text-gray-800 cursor-pointer">
                       {order.name}
                     </h3>
                     <p className="text-gray-600">&#x20B9;{order.price}</p>
                     <p className="text-sm text-gray-500">
                       Buyer: {order.buyer}
                     </p>
+                    {order.confirmation === 1 && (
+                      <p className="text-red-500">Rejected by you</p>
+                    )}
+                    {order.confirmation === 2 && (
+                      <p className="text-green-500">Accepted by Seller</p>
+                    )}
+                    {order.confirmation === 3 && (
+                      <p className="text-gray-500">Cancelled by Buyer</p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
@@ -138,8 +168,8 @@ export default function ReceivedOrders() {
                       variant="ghost"
                       size="icon"
                       className="text-green-500 hover:text-green-700"
-                      onClick={() => markAsSold(order.id)}
-                      disabled={order.sold}
+                      onClick={() => updateTransaction(order.id, 2)}
+                      disabled={order.confirmation === 2}
                     >
                       <CheckCircle className="h-5 w-5" />
                     </Button>
@@ -147,9 +177,10 @@ export default function ReceivedOrders() {
                       variant="ghost"
                       size="icon"
                       className="text-red-500 hover:text-red-700"
-                      onClick={() => removeOrder(order.id)}
+                      onClick={() => updateTransaction(order.id, 1)}
+                      disabled={order.confirmation === 1}
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <XCircle className="h-5 w-5" />
                     </Button>
                   </div>
                 </li>
@@ -157,18 +188,8 @@ export default function ReceivedOrders() {
             </ul>
           )}
         </CardContent>
-        <CardFooter className="bg-gray-50 p-6 flex justify-between items-center">
-          <Button
-            variant="outline"
-            className="border-purple-600 text-purple-600 hover:bg-purple-100"
-            onClick={() => navigate("/products")}
-          >
-            Continue Shopping
-          </Button>
-        </CardFooter>
       </Card>
 
-      {/* Chat Window */}
       {chatItem && (
         <ChatWindow
           item={chatItem}

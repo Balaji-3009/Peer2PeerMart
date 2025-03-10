@@ -110,7 +110,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative  mt-24">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative  pt-24">
       <Sidebar />
       <Toaster position="top-right" offset={50} />
 

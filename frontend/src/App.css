@@ -13,6 +13,14 @@
     @apply bg-background text-foreground;
   }
 }
+/* Add this in your global CSS file */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 .product-title {
   overflow: hidden;
   white-space: nowrap;
