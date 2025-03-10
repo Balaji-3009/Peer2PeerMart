@@ -125,3 +125,45 @@ async def getMyOrders(db: db_dependency, user_id:str, user_data = Depends(verify
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@transactionsRouter.put('/updateTransaction')
+async def updateTransaction(tranStatus: int, tranId: int, db: db_dependency, request: Request):
+    try:
+        fetchedTransaction = db.query(Transactions).filter(Transactions.id == tranId).first()
+        if not fetchedTransaction:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
+        fetchedTransaction.confirmation = tranStatus
+        
+        db.commit()
+        
+        fetchedTransaction = db.query(Transactions).filter(Transactions.id == tranId).first()
+        
+        return {
+            "status": "success",
+            "message": "Transaction updated successfully",
+            "data": fetchedTransaction
+        }
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@transactionsRouter.delete('/deleteTransaction')
+async def deleteTransaction(tranId: int, db: db_dependency, request: Request):
+    try:
+        fetchedTransaction = db.query(Transactions).filter(Transactions.id == tranId).first()
+        if not fetchedTransaction:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
+        db.delete(fetchedTransaction)
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": "Product deleted successfully",
+            "data": fetchedTransaction
+        }
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
