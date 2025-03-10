@@ -67,7 +67,9 @@ export default function MyProducts() {
           },
         }
       );
-
+      console.log(
+        `https://peer2peermart.onrender.com/products/deleteProduct/?productId=${id}`
+      );
       const data = await response.json();
 
       if (data.status === "success") {

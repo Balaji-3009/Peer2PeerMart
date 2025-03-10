@@ -70,6 +70,9 @@ export default function ChatWindow({ item, onClose }) {
             },
           }
         );
+        console.log(
+          `https://peer2peermart.onrender.com/chats/messages/${chatId}`
+        );
         const data = await response.json();
         setMessages(data);
       } catch (error) {

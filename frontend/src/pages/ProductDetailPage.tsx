@@ -114,20 +114,7 @@ export default function ProductDetailPage() {
       <Sidebar />
       <Toaster position="top-right" offset={50} />
 
-      <div className="fixed top-4 right-4 z-50">
-        <Button
-          variant="ghost"
-          className="relative"
-          onClick={handleAddToWishlist}
-          disabled={wishlistAdded}
-        >
-          <Heart
-            className={`h-6 w-6 ${
-              wishlistAdded ? "text-red-500" : "text-purple-600"
-            }`}
-          />
-        </Button>
-      </div>
+  
 
       <Card className="w-full max-w-4xl overflow-hidden">
         <CardHeader className="p-0">
