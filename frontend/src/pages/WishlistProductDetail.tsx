@@ -14,7 +14,7 @@ import Sidebar from "../components/Sidebar";
 import ReportSellerModal from "../components/ReportSellerModal";
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-export default function ProductDetailPage() {
+export default function WishlistWishlistProductDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [product, setProduct] = useState(null);

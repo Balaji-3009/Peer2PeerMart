@@ -17,6 +17,7 @@ import { Slider } from "../components/ui/slider";
 import { Upload } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import { toast } from "react-toastify";
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function CreateProductPage() {
   const navigate = useNavigate();
@@ -103,7 +104,7 @@ export default function CreateProductPage() {
 
     try {
       const response = await fetch(
-        "https://peer2peermart.onrender.com/products/createProducts",
+        `${VITE_BACKEND_URL}/products/createProducts`,
         {
           method: "POST",
           headers: {
@@ -171,14 +172,13 @@ export default function CreateProductPage() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch
+                <input
+                  type="checkbox"
                   id="negotiable"
                   name="negotiable"
                   checked={productData.negotiable}
-                  onCheckedChange={(checked) =>
-                    setProductData((prev) => ({ ...prev, negotiable: checked }))
-                  }
-                  className="border border-violet-500"
+                  onChange={handleInputChange}
+                  className="w-5 h-5 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
                 />
                 <Label
                   htmlFor="negotiable"

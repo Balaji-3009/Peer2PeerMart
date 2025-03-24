@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "../components/ui/card";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Trash2, MessageCircle, CheckCircle, XCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ReceivedOrders() {
   const navigate = useNavigate();
@@ -30,7 +27,7 @@ export default function ReceivedOrders() {
         }
 
         const response = await fetch(
-          `https://peer2peermart.onrender.com/transactions/getMyOrders?user_id=${userId}`,
+          `${VITE_BACKEND_URL}/transactions/getMyOrders?user_id=${userId}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -66,133 +63,67 @@ export default function ReceivedOrders() {
     fetchOrders();
   }, []);
 
-  const updateTransaction = async (tranId, status) => {
-    try {
-      const idToken = localStorage.getItem("idToken");
-      const url = `https://peer2peermart.onrender.com/transactions/updateTransaction?tranId=${tranId}&tranStatus=${status}`;
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        toast.success(
-          status === 2 ? "Product accepted successfully" : "Product rejected"
-        );
-        setOrders((items) =>
-          items.map((item) =>
-            item.id === tranId ? { ...item, confirmation: status } : item
-          )
-        );
-      } else {
-        toast.error("Failed to update transaction");
-      }
-    } catch (error) {
-      console.error("Error updating transaction:", error);
-      toast.error("Failed to update transaction");
-    }
-  };
+  const availableOrders = orders.filter((order) => order.confirmation === 0);
+  const acceptedOrders = orders.filter((order) => order.confirmation === 2);
+  const cancelledOrders = orders.filter((order) => order.confirmation === 3);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative pt-24">
-      <Sidebar />
-      <Toaster position="top-right" />
+    <div className="min-h-screen bg-gray-50 flex p-6 relative pt-24">
+      {/* Sidebar (Left) */}
+      <div className="w-1/4">
+        <Sidebar />
+      </div>
 
-      <div className="w-full max-w-6xl flex justify-center">
+      {/* Middle Section (Orders List) */}
+      <div className="w-1/2 flex flex-col items-center">
+        <Toaster position="top-right" />
         <motion.div
-          className="w-full max-w-4xl overflow-hidden"
+          className="w-full bg-white shadow-lg rounded-lg overflow-hidden transition-all"
           animate={{ x: chatItem ? -100 : 0 }}
           transition={{ type: "spring", stiffness: 100, damping: 15 }}
         >
           <Card>
-            <CardHeader className="bg-purple-600 text-white p-6">
+            <CardHeader className="bg-purple-600 text-white p-6 text-center">
               <h1 className="text-3xl font-bold">Received Orders</h1>
             </CardHeader>
             <CardContent className="p-6">
-              {orders.length === 0 ? (
-                <p className="text-gray-600 text-center">
-                  No orders received yet.
-                </p>
-              ) : (
-                <ul className="divide-y divide-gray-200">
-                  {orders.map((order) => (
-                    <li
-                      key={order.id}
-                      className={`py-4 flex items-center justify-between ${
-                        order.confirmation
-                          ? "opacity-50 pointer-events-none"
-                          : ""
-                      }`}
-                    >
-                      <div
-                        className="flex-1 cursor-pointer"
-                        onClick={() => navigate(`/product/${order.product_id}`)}
-                      >
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          {order.name}
-                        </h3>
-                        <p className="text-gray-600">&#x20B9;{order.price}</p>
-                        <p className="text-sm text-gray-500">
-                          Buyer: {order.buyer}
-                        </p>
-                        {order.confirmation === 1 && (
-                          <p className="text-red-500">Rejected by you</p>
-                        )}
-                        {order.confirmation === 2 && (
-                          <p className="text-green-500">Accepted by you</p>
-                        )}
-                        {order.confirmation === 3 && (
-                          <p className="text-gray-500">Cancelled by Buyer</p>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-purple-600 hover:text-purple-700"
-                          onClick={() => setChatItem(order)}
-                        >
-                          <MessageCircle className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-green-500 hover:text-green-700"
-                          onClick={() => updateTransaction(order.id, 2)}
-                          disabled={order.confirmation === 2}
-                        >
-                          <CheckCircle className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => updateTransaction(order.id, 1)}
-                          disabled={order.confirmation === 1}
-                        >
-                          <XCircle className="h-5 w-5" />
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {/* Available Orders */}
+              <OrderSection
+                title="📌 Available Orders"
+                orders={availableOrders}
+                navigate={navigate}
+                setChatItem={setChatItem}
+              />
+
+              {/* Cancelled Orders */}
+              <OrderSection
+                title="❌ Cancelled Orders"
+                orders={cancelledOrders}
+                navigate={navigate}
+                setChatItem={setChatItem}
+              />
+
+              {/* Accepted Orders */}
+              <OrderSection
+                title="✅ Accepted Orders"
+                orders={acceptedOrders}
+                navigate={navigate}
+                setChatItem={setChatItem}
+              />
             </CardContent>
           </Card>
         </motion.div>
+      </div>
 
+      {/* Right Side: Chat Window */}
+      <div className="w-1/4">
         <AnimatePresence>
           {chatItem && (
             <motion.div
-              className="absolute right-0 w-96 bg-white rounded-xl shadow-lg overflow-hidden"
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 100 }}
+              className="fixed right-0 w-96 bg-white rounded-xl shadow-lg overflow-hidden"
+              initial={{ x: 200, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 200, opacity: 0 }}
               transition={{ type: "spring", stiffness: 100, damping: 15 }}
             >
               <ChatWindow item={chatItem} onClose={() => setChatItem(null)} />
@@ -201,5 +132,58 @@ export default function ReceivedOrders() {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+/* Order Section Component */
+function OrderSection({ title, orders, navigate, setChatItem }) {
+  return (
+    <div className="mt-6">
+      <h2 className="text-lg font-semibold text-gray-700 mb-2">{title}</h2>
+      {orders.length === 0 ? (
+        <p className="text-gray-500">No orders.</p>
+      ) : (
+        <ul className="space-y-4">
+          {orders.map((order) => (
+            <OrderItem
+              key={order.id}
+              order={order}
+              navigate={navigate}
+              setChatItem={setChatItem}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* Order Item Component */
+function OrderItem({ order, navigate, setChatItem }) {
+  return (
+    <li
+      className="relative flex flex-col sm:flex-row items-center justify-between p-4 bg-white rounded-lg shadow-md border cursor-pointer transition-transform transform hover:scale-105"
+      onClick={() => navigate(`/product/${order.product_id}`)}
+    >
+      <div className="flex-1">
+        <h3 className="text-lg font-bold text-purple-700">{order.name}</h3>
+        <p className="text-gray-600 text-sm">Buyer: {order.buyer}</p>
+        <p className="text-purple-600 font-medium text-lg">
+          &#x20B9;{order.price}
+        </p>
+      </div>
+      <div className="flex items-center space-x-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            setChatItem(order);
+          }}
+        >
+          <MessageCircle className="h-6 w-6 text-purple-600" />
+        </Button>
+      </div>
+    </li>
   );
 }

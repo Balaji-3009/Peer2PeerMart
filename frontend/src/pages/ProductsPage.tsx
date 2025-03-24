@@ -16,13 +16,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../components/ui/popover";
-import { Slider } from "../components/ui/slider";
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 100]);
+  const [priceRange, setPriceRange] = useState([0, 100]); // Default until data loads
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(100);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function ProductsPage() {
       }
 
       const response = await fetch(
-        `https://peer2peermart.onrender.com/products/getProducts?user_id=${uuid}`,
+        `${VITE_BACKEND_URL}/products/getProducts?user_id=${uuid}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -67,12 +69,14 @@ export default function ProductsPage() {
         setProducts(formattedProducts);
         setFilteredProducts(formattedProducts); // Initialize filteredProducts with all products
 
-        // Dynamically set the max price for the slider
-        const maxPrice = Math.max(
-          ...formattedProducts.map((p) => p.price),
-          100
-        );
-        setPriceRange([0, maxPrice]);
+        // Dynamically set min and max price based on fetched products
+        const prices = formattedProducts.map((p) => p.price);
+        const calculatedMinPrice = Math.min(...prices, 0); // Minimum price or default to 0
+        const calculatedMaxPrice = Math.max(...prices, 100); // Maximum price or default to 100
+
+        setMinPrice(calculatedMinPrice);
+        setMaxPrice(calculatedMaxPrice);
+        setPriceRange([calculatedMinPrice, calculatedMaxPrice]); // Initialize range with min/max
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -93,8 +97,10 @@ export default function ProductsPage() {
     setSearchTerm(e.target.value);
   };
 
-  const handlePriceChange = (range) => {
-    setPriceRange(range);
+  const handlePriceChange = (index) => (e) => {
+    const newRange = [...priceRange];
+    newRange[index] = Number(e.target.value);
+    setPriceRange(newRange);
   };
 
   return (
@@ -129,18 +135,32 @@ export default function ProductsPage() {
                   <PopoverContent className="w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-300">
                     <div className="space-y-4">
                       <h4 className="font-medium">Filter by Price</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>&#8377;{priceRange[0]}</span>
-                          <span>&#8377;{priceRange[1]}</span>
-                        </div>
-                        <Slider
-                          max={priceRange[1]} // Set max dynamically
-                          step={1}
-                          value={priceRange}
-                          onValueChange={handlePriceChange}
-                          className="my-4"
+
+                      {/* Price Range Display */}
+                      <div className="flex justify-between text-sm font-medium text-gray-700">
+                        <span>₹{priceRange[0]}</span>
+                        <span>₹{priceRange[1]}</span>
+                      </div>
+
+                      {/* Price Range Slider */}
+                      <div className="slider-container">
+                        <input
+                          type="range"
+                          min={minPrice} // Dynamic min value
+                          max={maxPrice} // Dynamic max value
+                          value={priceRange[0]}
+                          onChange={handlePriceChange(0)}
+                          className="slider min-slider "
                         />
+                        <input
+                          type="range"
+                          min={minPrice} // Dynamic min value
+                          max={maxPrice} // Dynamic max value
+                          value={priceRange[1]}
+                          onChange={handlePriceChange(1)}
+                          className="slider max-slider"
+                        />
+                        <div className="slider-track"></div>
                       </div>
                     </div>
                   </PopoverContent>

@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { NavBar } from "./NavBar"; // Import the NavBar component
 
-const Sidebar = () => {
+const SideBar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -118,4 +118,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default SideBar;
