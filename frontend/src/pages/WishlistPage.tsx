@@ -12,6 +12,7 @@ export default function WishlistPage() {
   const [isLoading, setIsLoading] = useState(true);
   const chatRef = useRef(null);
   const navigate = useNavigate();
+  const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -26,7 +27,7 @@ export default function WishlistPage() {
         }
 
         const response = await fetch(
-          `https://peer2peermart.onrender.com/transactions/getWishList?user_id=${userId}`,
+          `${VITE_BACKEND_URL}/transactions/getWishList?user_id=${userId}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -68,7 +69,7 @@ export default function WishlistPage() {
   const cancelProduct = async (tranId) => {
     try {
       const idToken = localStorage.getItem("idToken");
-      const url = `https://peer2peermart.onrender.com/transactions/updateTransaction?tranId=${tranId}&tranStatus=3`;
+      const url = `${VITE_BACKEND_URL}/transactions/updateTransaction?tranId=${tranId}&tranStatus=3`;
       const response = await fetch(url, {
         method: "PUT",
         headers: {
@@ -94,7 +95,6 @@ export default function WishlistPage() {
     }
   };
 
-  // Close ChatWindow when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (chatRef.current && !chatRef.current.contains(event.target)) {
@@ -147,49 +147,67 @@ export default function WishlistPage() {
                 </button>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-200">
+              <ul className="space-y-4">
                 {wishlistItems.map((item) => (
                   <li
                     key={item.id}
-                    className={`py-4 flex items-center space-x-4 p-2 transition-opacity ${
-                      item.confirmation === 3 || item.confirmation == 2
-                        ? "opacity-40"
-                        : "hover:bg-gray-50"
+                    className={`relative p-4 rounded-lg shadow-md border cursor-pointer transition-transform transform hover:scale-105 ${
+                      item.confirmation === 3
+                        ? "bg-gray-200 opacity-50"
+                        : item.confirmation === 2
+                        ? "border-green-500"
+                        : "border-gray-300"
                     }`}
+                    onClick={() => navigate(`/product/${item.product_id}`)}
                   >
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {item.productName}
-                      </h3>
-                      <p className="text-gray-600">Seller: {item.sellerName}</p>
-                      <p className="text-purple-600 font-medium">
-                        &#x20B9;{item.price}
-                      </p>
-                      {item.confirmation === 3 && (
-                        <p className="text-gray-500 font-medium">
-                          Cancelled by You
+                    <div className="flex items-center justify-between">
+                      {/* Product Info */}
+                      <div>
+                        <h3 className="text-lg font-bold text-purple-700">
+                          {item.productName}
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          Seller: {item.sellerName}
                         </p>
-                      )}
+                        <p className="text-purple-600 font-medium text-lg">
+                          &#x20B9;{item.price}
+                        </p>
+                      </div>
+
+                      {/* Status Badge */}
                       {item.confirmation === 2 && (
-                        <p className="text-gray-500 font-medium">
-                          Accepted by buyer
-                        </p>
+                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs">
+                          Accepted
+                        </span>
+                      )}
+                      {item.confirmation === 3 && (
+                        <span className="bg-gray-500 text-white px-3 py-1 rounded-full text-xs">
+                          Cancelled
+                        </span>
                       )}
                     </div>
-                    <div className="flex items-center space-x-2">
+
+                    {/* Icons Positioned Absolutely */}
+                    <div className="absolute top-4 right-4 flex space-x-3 items-center">
                       {item.confirmation !== 3 && (
                         <button
-                          className="text-purple-600 hover:text-purple-700 p-2 rounded-full hover:bg-purple-100 transition-colors"
-                          onClick={() => setChatItem(item)}
+                          className="text-purple-600 hover:text-purple-800 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setChatItem(item);
+                          }}
                         >
-                          <MessageCircle className="h-5 w-5" />
+                          <MessageCircle className="h-6 w-6" />
                         </button>
                       )}
                       <button
-                        className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                        onClick={() => cancelProduct(item.id)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          cancelProduct(item.id);
+                        }}
                       >
-                        <XCircle className="h-5 w-5" />
+                        <XCircle className="h-6 w-6" />
                       </button>
                     </div>
                   </li>

@@ -12,6 +12,7 @@ import { Button } from "../components/ui/button";
 import { Pencil, Trash2, ShoppingBag, Plus, ArrowLeft } from "lucide-react";
 import EditProductDetails from "../components/EditProductDetails";
 import Sidebar from "../components/Sidebar";
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function MyProducts() {
   const [products, setProducts] = useState([]);
@@ -28,7 +29,7 @@ export default function MyProducts() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `https://peer2peermart.onrender.com/products/getMyProducts?user_id=${uuid}`,
+          `${VITE_BACKEND_URL}/products/getMyProducts?user_id=${uuid}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export default function MyProducts() {
   const removeProduct = async (id) => {
     try {
       const response = await fetch(
-        `https://peer2peermart.onrender.com/products/deleteProduct/?productId=${id}`,
+        `${VITE_BACKEND_URL}/products/deleteProduct/?productId=${id}`,
         {
           method: "DELETE",
           headers: {
@@ -68,7 +69,7 @@ export default function MyProducts() {
         }
       );
       console.log(
-        `https://peer2peermart.onrender.com/products/deleteProduct/?productId=${id}`
+        `${VITE_BACKEND_URL}/products/deleteProduct/?productId=${id}`
       );
       const data = await response.json();
 

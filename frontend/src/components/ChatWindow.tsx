@@ -13,6 +13,7 @@ export default function ChatWindow({ item, onClose }) {
 
   const uuid = localStorage.getItem("uuid");
   const idToken = localStorage.getItem("idToken");
+  const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -29,21 +30,18 @@ export default function ChatWindow({ item, onClose }) {
     setMessages([]);
     const createChat = async () => {
       try {
-        const response = await fetch(
-          "https://peer2peermart.onrender.com/chats/create_chat/",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${idToken}`,
-            },
-            body: JSON.stringify({
-              buyer_id: item.buyer_id,
-              seller_id: item.seller_id,
-              product_id: item.product_id,
-            }),
-          }
-        );
+        const response = await fetch(`${VITE_BACKEND_URL}/chats/create_chat/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            buyer_id: item.buyer_id,
+            seller_id: item.seller_id,
+            product_id: item.product_id,
+          }),
+        });
         const data = await response.json();
         if (data.chat_id) {
           setChatId(data.chat_id);
@@ -61,7 +59,7 @@ export default function ChatWindow({ item, onClose }) {
     const fetchMessages = async () => {
       try {
         const response = await fetch(
-          `https://peer2peermart.onrender.com/chats/messages/${chatId}`,
+          `${VITE_BACKEND_URL}/chats/messages/${chatId}`,
           {
             method: "GET",
             headers: {
@@ -70,9 +68,7 @@ export default function ChatWindow({ item, onClose }) {
             },
           }
         );
-        console.log(
-          `https://peer2peermart.onrender.com/chats/messages/${chatId}`
-        );
+        console.log(`${VITE_BACKEND_URL}/chats/messages/${chatId}`);
         const data = await response.json();
         setMessages(data);
       } catch (error) {

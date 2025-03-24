@@ -13,6 +13,7 @@ export const NavBar = () => {
     regNo: string;
   } | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -26,7 +27,7 @@ export const NavBar = () => {
 
       try {
         const response = await fetch(
-          `https://peer2peermart.onrender.com/users/getUser/${uuid}`,
+          `${VITE_BACKEND_URL}/users/getUser/${uuid}`,
           {
             method: "GET",
             headers: {

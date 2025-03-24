@@ -3,6 +3,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { Toaster, toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const firebaseConfig = {
   apiKey: "AIzaSyAtUlalrUexjrOZzBnAKnXuM0wcu-7Zw4A",
@@ -30,16 +31,13 @@ const AuthPage = () => {
       localStorage.setItem("idToken", idToken);
       console.log("User ID Token:", idToken);
 
-      const response = await fetch(
-        "https://peer2peermart.onrender.com/login/google",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ idToken }),
-        }
-      );
+      const response = await fetch(`${VITE_BACKEND_URL}/login/google`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idToken }),
+      });
 
       const data = await response.json();
       if (data.uuid) {
@@ -64,7 +62,7 @@ const AuthPage = () => {
   async function fetchUserDetails(uuid, idToken) {
     try {
       const response = await fetch(
-        `https://peer2peermart.onrender.com/users/getUser/${uuid}`,
+        `${VITE_BACKEND_URL}/users/getUser/${uuid}`,
         {
           method: "GET",
           headers: {
@@ -79,7 +77,7 @@ const AuthPage = () => {
       }
 
       const userData = await response.json();
-      navigate("./products");
+      navigate("/products");
     } catch (error) {
       toast.error("User not found. Redirecting...");
       navigate("/details");

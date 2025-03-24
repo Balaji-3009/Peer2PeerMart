@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function DetailsPage() {
   const navigate = useNavigate();
@@ -66,17 +67,14 @@ export default function DetailsPage() {
     };
 
     try {
-      const response = await fetch(
-        "https://peer2peermart.onrender.com/users/createUsers",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`,
-          },
-          body: JSON.stringify(userData),
-        }
-      );
+      const response = await fetch(`${VITE_BACKEND_URL}/users/createUsers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(userData),
+      });
 
       if (response.ok) {
         console.log("User details submitted successfully");

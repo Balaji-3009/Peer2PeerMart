@@ -7,10 +7,12 @@ import {
   CardFooter,
   CardHeader,
 } from "../components/ui/card";
-import { Heart } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import Sidebar from "../components/Sidebar";
 import ReportSellerModal from "../components/ReportSellerModal";
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ProductDetailPage() {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ export default function ProductDetailPage() {
       try {
         const idToken = localStorage.getItem("idToken");
         const response = await fetch(
-          `https://peer2peermart.onrender.com/products/getProduct/${id}`,
+          `${VITE_BACKEND_URL}/products/getProduct/${id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -52,12 +54,13 @@ export default function ProductDetailPage() {
 
     fetchProductDetails();
   }, [id]);
+
   const handleAddToWishlist = async () => {
-    if (wishlistAdded) return; // Prevent multiple clicks
+    if (wishlistAdded) return;
 
     try {
       const idToken = localStorage.getItem("idToken");
-      const userId = localStorage.getItem("uuid"); // Assuming 'uuid' is stored in localStorage
+      const userId = localStorage.getItem("uuid");
 
       if (!userId) {
         toast.error("User ID not found. Please log in again.");
@@ -65,7 +68,7 @@ export default function ProductDetailPage() {
       }
 
       const response = await fetch(
-        `https://peer2peermart.onrender.com/transactions/createTransactions`,
+        `${VITE_BACKEND_URL}/transactions/createTransactions`,
         {
           method: "POST",
           headers: {
@@ -84,7 +87,8 @@ export default function ProductDetailPage() {
 
       if (data.status === "success") {
         setWishlistAdded(true);
-        toast.success("Added to wishlist!", { duration: 3000 });
+        toast.dismiss();
+        toast.success("Added to wishlist!");
       } else {
         toast.error(data.message || "Failed to add to wishlist.");
       }
@@ -96,7 +100,7 @@ export default function ProductDetailPage() {
 
   const handleReportSubmit = (reason) => {
     console.log("Reporting seller with reason:", reason);
-    toast.success("Seller reported successfully", { duration: 3000 });
+    toast.success("Seller reported successfully");
     setIsReportModalOpen(false);
     navigate("/products");
   };
@@ -110,34 +114,36 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative  pt-24">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative pt-24">
       <Sidebar />
-      <Toaster position="top-right" offset={50} />
+      <ToastContainer position="top-right" autoClose={3000} />
 
-  
-
-      <Card className="w-full max-w-4xl overflow-hidden">
+      <Card className="w-full max-w-4xl overflow-hidden shadow-lg">
         <CardHeader className="p-0">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-[50vh] object-contain"
+            className="w-full h-[50vh] object-contain bg-white p-4"
           />
         </CardHeader>
         <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
-            <p className="text-2xl font-bold text-purple-600">
-              &#8377;{product.price.toFixed(2)}
+          <div className="mb-4">
+            <h1 className="text-4xl font-extrabold text-violet-700 mb-2">
+              {product.name}
+            </h1>
+            <p className="text-lg text-gray-700 font-serif">
+              {product.longDescription}
             </p>
           </div>
-          <p className="text-2xl text-gray-600 mb-6  text-purple-600">
-            {product.user_name}
+          <p className="text-2xl font-bold text-purple-600 mb-4">
+            &#8377;{product.price.toFixed(2)}
           </p>
-          <p className="text-gray-600 mb-6">{product.longDescription}</p>
+
           {product.specs.length > 0 && (
             <>
-              <h2 className="text-xl font-semibold mb-2">Specifications:</h2>
+              <h2 className="text-xl font-semibold text-violet-700 mb-2">
+                Specifications:
+              </h2>
               <ul className="list-disc pl-5 mb-6">
                 {product.specs.map((spec, index) => (
                   <li key={index} className="text-gray-600">
@@ -150,7 +156,7 @@ export default function ProductDetailPage() {
         </CardContent>
         <CardFooter className="bg-gray-50 p-6 flex flex-wrap gap-4">
           <Button
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-violet-700 hover:bg-violet-800 text-white font-semibold px-6 py-2"
             onClick={handleAddToWishlist}
             disabled={wishlistAdded}
           >
@@ -158,14 +164,14 @@ export default function ProductDetailPage() {
           </Button>
           <Button
             variant="outline"
-            className="border-red-600 text-red-600 hover:bg-red-100"
+            className="border-red-600 text-red-600 hover:bg-red-100 font-semibold px-6 py-2"
             onClick={() => setIsReportModalOpen(true)}
           >
             Report Seller
           </Button>
           <Button
             variant="ghost"
-            className="text-gray-600"
+            className="text-gray-600 hover:text-gray-900 px-6 py-2"
             onClick={() => navigate("/products")}
           >
             Back to Products
