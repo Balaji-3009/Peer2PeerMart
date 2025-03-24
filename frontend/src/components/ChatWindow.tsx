@@ -39,7 +39,7 @@ export default function ChatWindow({ item, onClose }) {
           body: JSON.stringify({
             buyer_id: item.buyer_id,
             seller_id: item.seller_id,
-            product_id: item.product_id,
+            product_id: Number(item.product_id),
           }),
         });
         const data = await response.json();
@@ -68,9 +68,15 @@ export default function ChatWindow({ item, onClose }) {
             },
           }
         );
-        console.log(`${VITE_BACKEND_URL}/chats/messages/${chatId}`);
         const data = await response.json();
-        setMessages(data);
+
+        // Convert timestamps from UTC to IST
+        const convertedMessages = data.map((msg) => ({
+          ...msg,
+          created_at: convertToIST(msg.created_at),
+        }));
+
+        setMessages(convertedMessages);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
@@ -80,12 +86,13 @@ export default function ChatWindow({ item, onClose }) {
     let ws;
     const connectWebSocket = () => {
       ws = new WebSocket(
-        `wss://peer2peermart.onrender.com/chats/ws/${chatId}/${uuid}`
+        `wss://peer2peermart-y0wq.onrender.com/chats/ws/${chatId}/${uuid}`
       );
       ws.onopen = () => console.log("Connected to WebSocket");
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          data.created_at = convertToIST(data.created_at); // Convert real-time messages too
           setMessages((prev) => [...prev, data]);
         } catch (error) {
           console.error("Error parsing WebSocket message:", error);
@@ -106,6 +113,22 @@ export default function ChatWindow({ item, onClose }) {
       if (ws) ws.close();
     };
   }, [chatId, uuid, idToken]);
+
+  // ✅ Correct Function to Convert UTC Time (Database) to IST
+  const convertToIST = (utcTimeString) => {
+    if (!utcTimeString) return "";
+
+    const utcDate = new Date(utcTimeString); // Convert string to Date object
+
+    // Convert UTC to IST (UTC +5:30)
+    const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
+
+    return istDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true, // AM/PM format
+    });
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -168,10 +191,7 @@ export default function ChatWindow({ item, onClose }) {
               >
                 <p>{message.content}</p>
                 <div className="text-xs text-gray-500 mt-1 text-right">
-                  {new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {message.created_at}
                 </div>
               </div>
             </div>
