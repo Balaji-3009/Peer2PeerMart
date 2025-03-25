@@ -79,6 +79,7 @@ const AuthPage = () => {
         navigate("/details");
         return;
       }
+<<<<<<< HEAD
 
       // For other error statuses
       if (!response.ok) {
@@ -86,6 +87,11 @@ const AuthPage = () => {
       }
 
       // Success case - user exists
+=======
+      console.log(uuid)
+      console.log(idToken)
+      const userData = await response.json();
+>>>>>>> f82211276dbe2539a02a37200aa9052c4584a70a
       navigate("/products");
     } catch (error) {
       console.error("Error fetching user details:", error);
@@ -124,10 +130,14 @@ const AuthPage = () => {
           </p>
         </div>
 
+<<<<<<< HEAD
         <div
           className="glass rounded-2xl overflow-hidden shadow-xl p-8 animate-slide-up"
           style={{ animationDelay: "0.2s" }}
         >
+=======
+        <div className="glass rounded-2xl overflow-hidden shadow-xl p-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+>>>>>>> f82211276dbe2539a02a37200aa9052c4584a70a
           <div className="text-center mb-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Join Your Campus Marketplace

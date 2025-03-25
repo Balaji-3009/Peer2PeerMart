@@ -46,11 +46,37 @@ async def getUser(userId: str, db: db_dependency, user_data = Depends(verify_tok
     try:
         fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
         if not fetchedUser:
-            raise HTTPException(status_code=404, detail="User not found")
+            return {
+                "status": "404",
+                "message": "User not found"
+            }
         return {
             "status": "success",
             "message": "User fetched successfully",
             "data": fetchedUser
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@usersRouter.put('/updateUser')
+async def updateUser(users: UserBase, userId: str, db: db_dependency, request: Request):
+    try:
+        fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
+        if not fetchedUser:
+            raise HTTPException(status_code=404, detail="User not found")
+        fetchedUser.name = users.name
+        fetchedUser.regNo = users.regNo
+        fetchedUser.email = users.email
+        fetchedUser.pno = users.pno
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": "User updated successfully",
+            "data": fetchedUser
+        }
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))

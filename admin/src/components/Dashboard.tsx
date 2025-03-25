@@ -24,8 +24,8 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState([0, 100]);
   const navigate = useNavigate();
-  const userId = "Xt0TVWGDRZPon4JRARlvZbuAnEy2";
-  const authToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjMwYjIyMWFiNjU2MTdiY2Y4N2VlMGY4NDYyZjc0ZTM2NTIyY2EyZTQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiR29rdWwiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jS1o2bVo2SHpjTjBMNEQ2NW4tNzlFTFpSMDJLRFFMVEQ1SDNfbG1tZWNBQTBIcz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9wMnBtYXJ0LTExOTMxIiwiYXVkIjoicDJwbWFydC0xMTkzMSIsImF1dGhfdGltZSI6MTc0MjgzMjc2NCwidXNlcl9pZCI6Ilh0MFRWV0dEUlpQb240SlJBUmx2WmJ1QW5FeTIiLCJzdWIiOiJYdDBUVldHRFJaUG9uNEpSQVJsdlpidUFuRXkyIiwiaWF0IjoxNzQyODMyNzY0LCJleHAiOjE3NDI4MzYzNjQsImVtYWlsIjoidGVtcC5nb2t1bDA0QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTAzNzk4OTM1Mzg1NzA2NDE5NDI0Il0sImVtYWlsIjpbInRlbXAuZ29rdWwwNEBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJnb29nbGUuY29tIn19.xTpT4svcPUqGGcSVpe_qTsYtffMLfgFc2nFNOD83ItD1MerLl3jE8T5cvDSqgDGlLvnxbgp4vlGz-C6XB_n0PJ6KEWuj4NM9w1eRWB4IXgBk-toJVV3wMf19SuE7QBn1s0tIIiQmPA9uegkNugjaOdVqGEesFCl7baSe2GnzHBLlQWqAcLbeyUiFbi2P-s2Ec-aQj56EwAP_oXbnN5izfMpOMSwWudj8LtpVpm8vRhEIdsG7Irwjr_4RvCCOH4y2hXV_tUpXU8J7IgEarKV6OQGoEZRMt82pWKgDSl5UxGPyeqTZwFxBbvdjl-D2RA3bd2fnxm5gkNnyPoPRtlWFgg";
+  const userId = "s9dBDmERh9hA2WX1M2vrVZdZ3Um1";
+  const authToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjMwYjIyMWFiNjU2MTdiY2Y4N2VlMGY4NDYyZjc0ZTM2NTIyY2EyZTQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiR29rdWwgMjJCQ0UyOTQ1IiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0t0UVBQSV9XRnIzZXFfaFF3cndSSzRCQ0RpcHM3Mk9qaEVaenVSYURzZ0tZdHFqZz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9wMnBtYXJ0LTExOTMxIiwiYXVkIjoicDJwbWFydC0xMTkzMSIsImF1dGhfdGltZSI6MTc0MjkyMjAxMCwidXNlcl9pZCI6InM5ZEJEbUVSaDloQTJXWDFNMnZyVlpkWjNVbTEiLCJzdWIiOiJzOWRCRG1FUmg5aEEyV1gxTTJ2clZaZFozVW0xIiwiaWF0IjoxNzQyOTIyMDEwLCJleHAiOjE3NDI5MjU2MTAsImVtYWlsIjoiZ29rdWwuMjAyMkB2aXRzdHVkZW50LmFjLmluIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTU5MTIxMzUyNDQzNDU3MzM3MDMiXSwiZW1haWwiOlsiZ29rdWwuMjAyMkB2aXRzdHVkZW50LmFjLmluIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.tW9ebvaGOsXB46nl9QbYlJr1jejY4Yc37U3DCHTbObgoNlpn5fZ1ZLOIGRmQ9Ipd9OxzfLcWovGBUl9WgsBmZhl5iLlwfQRQ0TOBx7X-V7EcURcoZC-qAQvGdZ5ROnRcyegY_9JEw9ixKjIl1r_10s1hRPXjpD1t7EFKoMOvkGk2SfJIJ1k-X6QxFJmah2b9JApjgj7wNkEEFbjxR1_bPpAC_yNxEgRH9uSWDI3C1rfImksliPKaZn06HCDdOqXoC9Z26cuqskl8rYFSaO0HjkoCPjRJ4VY_rTx7ufwCLS_c1sNosna2hmanwQwPBgKOjCOdhxT4ArGPrBT2RoTXVg";
 
   useEffect(() => {
     fetchProducts();
@@ -79,9 +79,11 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex pt-28">
+    <div>
       <Sidebar />
-      <div className="flex-1 p-6">
+    <div className="m-12 min-h-screen bg-gray-100 flex pt-28">
+
+      <div className="flex-1 p-10">
         <div className="space-y-8 w-full max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-center text-gray-800">
             Best Finds on Campus
@@ -152,6 +154,7 @@ function Dashboard() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
