@@ -71,8 +71,8 @@ function ProductDetail() {
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar />
-      <div className="flex-1 p-6">
-        <Card className="w-full max-w-4xl mx-auto">
+      <div className="flex-1 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
           <CardHeader>
             <CardTitle>{product.name}</CardTitle>
           </CardHeader>
