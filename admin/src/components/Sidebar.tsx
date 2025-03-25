@@ -9,6 +9,7 @@ import {
   Users as UsersIcon,
   FileText,
 } from "lucide-react";
+import { NavBar } from "./NavBar";
 import { Button } from "./ui/button";
 import { Toaster } from "sonner";
 
@@ -36,6 +37,7 @@ const Sidebar = () => {
   return (
     <>
       <Toaster richColors position="top-right" />
+      <NavBar />
       {!isMobile ? (
         <div
           className={`fixed left-0 top-0 h-full bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col z-20 pt-16 ${
