@@ -150,16 +150,16 @@ export default function ChatWindow({ item, onClose }) {
   };
   return (
     <div
-      className={`fixed bottom-0 right-0 z-50 w-full md:w-96 shadow-2xl transform transition-all duration-300 ease-out ${
+      className={`fixed bottom-1 top-14 right-0 z-50 w-full md:w-96 shadow-2xl transform transition-all duration-300 ease-out ${
         isVisible
           ? "translate-y-0 opacity-100 scale-100"
           : "translate-y-20 opacity-0 scale-95"
-      } bg-white border-l border-t border-gray-200 flex flex-col md:h-[calc(100vh-4rem)] h-[70vh] rounded-t-xl md:rounded-none`}
+      } bg-white border-l border-t border-gray-200 flex flex-col h-[80vh] md:h-[calc(100vh-4rem)] rounded-t-xl md:rounded-none`}
     >
-      {/* Header remains unchanged */}
+      {/* Header */}
       <div className="bg-purple-600 text-white p-4 flex justify-between items-center rounded-t-xl md:rounded-none">
         <h2 className="text-lg font-semibold truncate">
-          Chat about {item.product_name}
+          Chat about {item.name}
         </h2>
         <button
           onClick={handleClose}
@@ -169,17 +169,10 @@ export default function ChatWindow({ item, onClose }) {
         </button>
       </div>
 
-      {/* Messages container - mobile specific changes */}
-      <div
-        className="flex-grow overflow-y-auto p-4 bg-gray-50"
-        style={{
-          // Mobile-specific styles
-          "@media (max-width: 768px)": {
-            paddingBottom: "80px",
-            maxHeight: "calc(100% - 120px)",
-          },
-        }}
-      >
+      {/* Messages container */}
+      <div className="flex-grow overflow-y-auto p-4 bg-gray-50 pb-[72px]">
+        {" "}
+        {/* Adjusted padding */}
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             <p>Start a conversation about this item</p>
@@ -200,7 +193,7 @@ export default function ChatWindow({ item, onClose }) {
                 }`}
               >
                 <p>{message.content}</p>
-                <div className="text-xs text-gray-500 mt-1 text-right">
+                <div className="text-xs text-gray-1000 mt-1 text-right">
                   {message.created_at}
                 </div>
               </div>
@@ -210,49 +203,26 @@ export default function ChatWindow({ item, onClose }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input box - mobile specific changes */}
-      <div
-        className="p-4 border-t border-gray-200 bg-white md:static"
-        style={{
-          // Mobile-specific styles
-          "@media (max-width: 768px)": {
-            position: "sticky",
-            bottom: "0",
-            left: "0",
-            right: "0",
-            zIndex: 10,
-          },
-        }}
-      >
-        <form onSubmit={handleSendMessage} className="flex">
-          <input
-            type="text"
-            placeholder="Type a message..."
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            className="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <button
-            type="submit"
-            className="bg-purple-600 text-white px-4 py-2 rounded-r-lg hover:bg-purple-700 transition-colors"
-          >
-            Send
-          </button>
-        </form>
+      {/* Input box - optimized for mobile */}
+      <div className="fixed bottom-0 left-0 right-0 md:static md:sticky md:bottom-2 px-4 bg-white pt-2 pb-4 border-t border-gray-200">
+        <div className="max-w-[calc(100%-32px)] md:max-w-none mx-auto">
+          <form onSubmit={handleSendMessage} className="flex">
+            <input
+              type="text"
+              placeholder="Type a message..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              className="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <button
+              type="submit"
+              className="bg-purple-600 text-white px-4 py-2 rounded-r-lg hover:bg-purple-700 transition-colors"
+            >
+              Send
+            </button>
+          </form>
+        </div>
       </div>
-
-      {/* Mobile-specific styles using CSS-in-JS */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .chat-container {
-            height: 85vh;
-            max-height: 100vh;
-            top: 0;
-            bottom: auto;
-          }
-        }
-      `}</style>
-      <div className="chat-container"></div>
     </div>
   );
 }

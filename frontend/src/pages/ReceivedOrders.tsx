@@ -79,8 +79,8 @@ export default function ReceivedOrders() {
         <Toaster position="top-right" />
         <motion.div
           className="w-full bg-white shadow-lg rounded-lg overflow-hidden transition-all"
-          animate={{ x: chatItem ? -100 : 0 }}
-          transition={{ type: "spring", stiffness: 100, damping: 15 }}
+          animate={{ x: chatItem ? -150 : 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 1500 }}
         >
           <Card>
             <CardHeader className="bg-purple-600 text-white p-6 text-center">

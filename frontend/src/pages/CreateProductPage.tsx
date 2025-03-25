@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -55,11 +54,11 @@ export default function CreateProductPage() {
     formData.append("file", file);
     formData.append(
       "upload_preset",
-      import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || ''
+      import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || ""
     );
 
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${
-      import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || ''
+      import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || ""
     }/image/upload`;
 
     try {
@@ -161,21 +160,14 @@ export default function CreateProductPage() {
       <Sidebar />
       <div className="flex-1 p-6 md:p-10 animate-fade-in">
         <div className="max-w-2xl mx-auto">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate("/myproducts")}
-            className="mb-6 text-violet-700 hover:text-violet-900 hover:bg-violet-100 transition-all flex items-center"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to My Products
-          </Button>
-          
           <Card className="shadow-xl border-violet-200 overflow-hidden transition-all duration-300 hover:shadow-violet-200/50">
             <CardHeader className="bg-gradient-to-r from-violet-600 to-purple-700 text-white p-6">
               <h1 className="text-3xl font-bold">Create New Product</h1>
-              <p className="text-violet-100 mt-2">Add a new item to your store</p>
+              <p className="text-violet-100 mt-2">
+                Add a new item to your store
+              </p>
             </CardHeader>
-            
+
             <CardContent className="p-6 md:p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
@@ -194,7 +186,10 @@ export default function CreateProductPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price" className="text-violet-800 font-medium">
+                  <Label
+                    htmlFor="price"
+                    className="text-violet-800 font-medium"
+                  >
                     Price (₹)
                   </Label>
                   <Input
@@ -227,7 +222,10 @@ export default function CreateProductPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-violet-800 font-medium">
+                  <Label
+                    htmlFor="description"
+                    className="text-violet-800 font-medium"
+                  >
                     Description
                   </Label>
                   <Textarea
@@ -242,10 +240,13 @@ export default function CreateProductPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="image" className="text-violet-800 font-medium">
+                  <Label
+                    htmlFor="image"
+                    className="text-violet-800 font-medium"
+                  >
                     Product Image
                   </Label>
-                  
+
                   {productData.imageUrl ? (
                     <div className="mt-2 relative">
                       <div className="relative rounded-lg overflow-hidden border border-violet-200 w-full h-48 bg-white">
@@ -290,7 +291,9 @@ export default function CreateProductPage() {
                         ) : (
                           <>
                             <ImagePlus className="h-12 w-12 mb-3 text-violet-400" />
-                            <span className="font-medium">Click to upload image</span>
+                            <span className="font-medium">
+                              Click to upload image
+                            </span>
                             <span className="text-sm text-violet-400 mt-1">
                               JPG, PNG or GIF (max. 5MB)
                             </span>
@@ -302,7 +305,7 @@ export default function CreateProductPage() {
                 </div>
               </form>
             </CardContent>
-            
+
             <CardFooter className="bg-violet-50 p-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-violet-100">
               <Button
                 variant="outline"

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -66,9 +65,6 @@ export default function MyProducts() {
             Authorization: `Bearer ${idToken}`,
           },
         }
-      );
-      console.log(
-        `${VITE_BACKEND_URL}/products/deleteProduct/?productId=${id}`
       );
       const data = await response.json();
 
@@ -173,59 +169,61 @@ export default function MyProducts() {
                           )}
                         </div>
 
-                        <div className="flex-1">
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                            <div>
-                              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                                {product.name}
-                              </h3>
-                              <div className="flex items-center gap-2 mb-4">
-                                <span className="text-primary font-semibold text-xl">
-                                  ₹{Number.parseFloat(product.price).toFixed(2)}
-                                </span>
-                                {product.negotiable && (
-                                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                                    Negotiable
+                        <div className="flex-1 flex flex-col">
+                          <div className="flex-grow">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                              <div>
+                                <h3 className="text-xl font-semibold text-gray-800 ">
+                                  {product.name}
+                                </h3>
+                                <div className="flex items-center gap-2 mb-4">
+                                  <span className="text-primary font-semibold text-xl">
+                                    ₹{Number.parseFloat(product.price).toFixed(2)}
                                   </span>
-                                )}
+                                  {product.negotiable && (
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                      Negotiable
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-3 sm:self-start">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-primary border-primary/20 hover:bg-primary/10 hover:border-primary/30 rounded-lg"
+                                  onClick={() => openEditPopup(product)}
+                                >
+                                  <Pencil className="h-4 w-4 mr-2" /> Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 rounded-lg"
+                                  onClick={() => removeProduct(product.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                </Button>
                               </div>
                             </div>
 
-                            <div className="flex items-center space-x-3 sm:self-start">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-primary border-primary/20 hover:bg-primary/10 hover:border-primary/30 rounded-lg"
-                                onClick={() => openEditPopup(product)}
-                              >
-                                <Pencil className="h-4 w-4 mr-2" /> Edit
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 rounded-lg"
-                                onClick={() => removeProduct(product.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" /> Delete
-                              </Button>
+                            <p className="text-gray-600 mb-4 line-clamp-2">
+                              {product.desc}
+                            </p>
+
+                            <div className="flex flex-wrap gap-2 text-sm">
+                              {product.category && (
+                                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                                  {product.category}
+                                </span>
+                              )}
+                              {product.stock !== undefined && (
+                                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                                  Stock: {product.stock}
+                                </span>
+                              )}
                             </div>
-                          </div>
-
-                          <p className="text-gray-600 mb-4 line-clamp-2">
-                            {product.desc}
-                          </p>
-
-                          <div className="flex flex-wrap gap-2 text-sm">
-                            {product.category && (
-                              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                                {product.category}
-                              </span>
-                            )}
-                            {product.stock !== undefined && (
-                              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                                Stock: {product.stock}
-                              </span>
-                            )}
                           </div>
                         </div>
                       </div>
