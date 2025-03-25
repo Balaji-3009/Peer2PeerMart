@@ -16,6 +16,7 @@ class Entry(Base):
     buyer_chats = relationship("Chat", back_populates="buyer", foreign_keys="[Chat.buyer_id]")
     seller_chats = relationship("Chat", back_populates="seller", foreign_keys="[Chat.seller_id]")
     message = relationship("Message", back_populates="entry")
+    report = relationship("Reports", back_populates="entry")
 
 
 class Users(Base):
@@ -27,6 +28,7 @@ class Users(Base):
     regNo = Column(String)
     email = Column(String)
     pno = Column(String)
+    banned = Column(Integer, default=0)
     createdAt = Column(DateTime, default=func.now())
     updatedAt = Column(DateTime, default=func.now(), onupdate=func.now())
     
@@ -47,6 +49,7 @@ class Products(Base):
     
     entry = relationship("Entry", back_populates="product")
     transaction = relationship("Transactions", back_populates="product")
+    report = relationship("Reports", back_populates="product")
     
 class Transactions(Base):
     
@@ -85,3 +88,16 @@ class Message(Base):
     
     entry = relationship("Entry", back_populates="message")
     chat = relationship("Chat", back_populates="message")
+    
+class Reports(Base):
+    
+    __tablename__ = 'reports'
+    report_id = Column(Integer, primary_key=True)
+    user_id = Column(String, ForeignKey("entry.uuid"))
+    product_id = Column(Integer, ForeignKey('products.id'))
+    reason = Column(String)
+    createdAt = Column(DateTime, default=func.now())
+    updatedAt = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    entry = relationship("Entry", back_populates="report")
+    product = relationship("Products", back_populates="report")

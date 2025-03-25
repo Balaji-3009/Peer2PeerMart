@@ -29,3 +29,9 @@ class ChatBase(BaseModel):
     buyer_id : str
     seller_id : str
     product_id : int
+    
+class ReportBase(BaseModel):
+    
+    user_id : str
+    product_id : int
+    reason : str
