@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -37,7 +37,7 @@ export const NavBar = ({ onEditProduct }) => {
             },
           }
         );
-     
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -66,11 +66,11 @@ export const NavBar = ({ onEditProduct }) => {
 
   const handleEditProfile = () => {
     if (userData) {
-      navigate("/detailsupdate", { 
-        state: { 
+      navigate("/detailsupdate", {
+        state: {
           userData,
-          from: "navbar" 
-        } 
+          from: "navbar",
+        },
       });
     }
   };
@@ -93,16 +93,24 @@ export const NavBar = ({ onEditProduct }) => {
             onMouseLeave={() => setIsProfileOpen(false)}
           >
             <div className="p-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 relative">
                 <div className="bg-purple-100 p-2 rounded-full">
                   <User className="h-6 w-6 text-purple-600" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h2 className="text-lg font-semibold text-purple-600">
                     {userData.name}
                   </h2>
                   <p className="text-sm text-gray-600">{userData.regNo}</p>
                 </div>
+                {/* Edit icon inside profile panel */}
+                <button
+                  onClick={handleEditProfile}
+                  className="absolute top-0 right-0 p-1 text-purple-600 hover:bg-purple-100 rounded-full transition"
+                  title="Edit Profile"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
               </div>
               <div className="mt-4">
                 <p className="text-sm text-gray-600">
@@ -113,13 +121,6 @@ export const NavBar = ({ onEditProduct }) => {
                 </p>
               </div>
               <div className="mt-4 space-y-2">
-                <Button
-                  variant="ghost"
-                  className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-                  onClick={handleEditProfile}
-                >
-                  Edit Profile
-                </Button>
                 <Button
                   variant="ghost"
                   className="w-full bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition"
