@@ -70,7 +70,8 @@ const AuthPage = () => {
           },
         }
       );
-
+      console.log(uuid);
+      console.log(idToken);
       const data = await response.json();
 
       // Handle 404 specifically
