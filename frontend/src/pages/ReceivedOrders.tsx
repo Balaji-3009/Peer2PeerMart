@@ -113,16 +113,17 @@ export default function ReceivedOrders() {
                 navigate={navigate}
                 setChatItem={setChatItem}
                 setOrders={setOrders}
+                hideActions
               />
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Right Side: Chat Window */}
+      {/* Right Side: Chat Window - Only show for available orders */}
       <div className="w-full md:w-1/4">
         <AnimatePresence>
-          {chatItem && (
+          {chatItem && chatItem.confirmation === 0 && (
             <motion.div
               className="fixed right-0 w-full md:w-96 bg-white rounded-xl shadow-lg overflow-hidden"
               initial={{ x: 200, opacity: 0 }}
@@ -170,7 +171,8 @@ function OrderSection({
     </div>
   );
 }
-function OrderItem({ order, navigate, setChatItem, setOrders }) {
+
+function OrderItem({ order, navigate, setChatItem, setOrders, hideActions }) {
   const handleUpdateStatus = async (newStatus, e) => {
     e.stopPropagation(); // Prevent navigation to product page
 
@@ -219,36 +221,37 @@ function OrderItem({ order, navigate, setChatItem, setOrders }) {
         </p>
       </div>
       <div className="flex items-center space-x-3">
-        {order.confirmation === 0 && (
+        {!hideActions && (
           <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => handleUpdateStatus(2, e)}
-            >
-              <CheckCircle className="h-6 w-6 text-green-600" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => handleUpdateStatus(3, e)}
-            >
-              <XCircle className="h-6 w-6 text-red-600" />
-            </Button>
+            {order.confirmation === 0 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setChatItem(order);
+                  }}
+                >
+                  <MessageCircle className="h-6 w-6 text-purple-600" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => handleUpdateStatus(2, e)}
+                >
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => handleUpdateStatus(3, e)}
+                >
+                  <XCircle className="h-6 w-6 text-red-600" />
+                </Button>
+              </>
+            )}
           </>
-        )}
-
-        {order.confirmation === 2 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              setChatItem(order);
-            }}
-          >
-            <MessageCircle className="h-6 w-6 text-purple-600" />
-          </Button>
         )}
       </div>
     </li>
