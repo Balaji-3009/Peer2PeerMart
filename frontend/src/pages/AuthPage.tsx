@@ -74,7 +74,8 @@ const AuthPage = () => {
       if (!response.ok) {
         throw new Error("User not found");
       }
-
+      console.log(uuid)
+      console.log(idToken)
       const userData = await response.json();
       navigate("/products");
     } catch (error) {
@@ -97,7 +98,7 @@ const AuthPage = () => {
             The campus marketplace for students to buy and sell books, gadgets, and essentials
           </p>
         </div>
-        
+
         <div className="glass rounded-2xl overflow-hidden shadow-xl p-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <div className="text-center mb-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Join Your Campus Marketplace</h2>
@@ -105,7 +106,7 @@ const AuthPage = () => {
               Sign in with your college Google account to get started
             </p>
           </div>
-          
+
           <button
             onClick={googleSignIn}
             disabled={loading}
@@ -118,10 +119,10 @@ const AuthPage = () => {
               />
             </svg>
             <span>Continue with Google</span>
-            
+
             <div className="absolute inset-0 h-full w-full scale-0 rounded-xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/10"></div>
           </button>
-          
+
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-500">
               By signing in, you agree to our{" "}
