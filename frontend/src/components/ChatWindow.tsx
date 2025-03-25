@@ -148,7 +148,6 @@ export default function ChatWindow({ item, onClose }) {
       onClose();
     }, 300);
   };
-
   return (
     <div
       className={`fixed bottom-0 right-0 z-50 w-full md:w-96 shadow-2xl transform transition-all duration-300 ease-out ${
@@ -157,6 +156,7 @@ export default function ChatWindow({ item, onClose }) {
           : "translate-y-20 opacity-0 scale-95"
       } bg-white border-l border-t border-gray-200 flex flex-col md:h-[calc(100vh-4rem)] h-[70vh] rounded-t-xl md:rounded-none`}
     >
+      {/* Header remains unchanged */}
       <div className="bg-purple-600 text-white p-4 flex justify-between items-center rounded-t-xl md:rounded-none">
         <h2 className="text-lg font-semibold truncate">
           Chat about {item.product_name}
@@ -169,7 +169,17 @@ export default function ChatWindow({ item, onClose }) {
         </button>
       </div>
 
-      <div className="flex-grow overflow-y-auto p-4 bg-gray-50">
+      {/* Messages container - mobile specific changes */}
+      <div
+        className="flex-grow overflow-y-auto p-4 bg-gray-50"
+        style={{
+          // Mobile-specific styles
+          "@media (max-width: 768px)": {
+            paddingBottom: "80px",
+            maxHeight: "calc(100% - 120px)",
+          },
+        }}
+      >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             <p>Start a conversation about this item</p>
@@ -200,7 +210,20 @@ export default function ChatWindow({ item, onClose }) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-gray-200 bg-white">
+      {/* Input box - mobile specific changes */}
+      <div
+        className="p-4 border-t border-gray-200 bg-white md:static"
+        style={{
+          // Mobile-specific styles
+          "@media (max-width: 768px)": {
+            position: "sticky",
+            bottom: "0",
+            left: "0",
+            right: "0",
+            zIndex: 10,
+          },
+        }}
+      >
         <form onSubmit={handleSendMessage} className="flex">
           <input
             type="text"
@@ -217,6 +240,19 @@ export default function ChatWindow({ item, onClose }) {
           </button>
         </form>
       </div>
+
+      {/* Mobile-specific styles using CSS-in-JS */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .chat-container {
+            height: 85vh;
+            max-height: 100vh;
+            top: 0;
+            bottom: auto;
+          }
+        }
+      `}</style>
+      <div className="chat-container"></div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, CheckCircle, XCircle } from "lucide-react";
 import ChatWindow from "../components/ChatWindow";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -68,14 +68,14 @@ export default function ReceivedOrders() {
   const cancelledOrders = orders.filter((order) => order.confirmation === 3);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex p-6 relative pt-24">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row p-6 relative pt-24">
       {/* Sidebar (Left) */}
-      <div className="w-1/4">
+      <div className="w-full md:w-1/4 mb-6 md:mb-0">
         <Sidebar />
       </div>
 
       {/* Middle Section (Orders List) */}
-      <div className="w-1/2 flex flex-col items-center">
+      <div className="w-full md:w-1/2 flex flex-col items-center">
         <Toaster position="top-right" />
         <motion.div
           className="w-full bg-white shadow-lg rounded-lg overflow-hidden transition-all"
@@ -93,14 +93,17 @@ export default function ReceivedOrders() {
                 orders={availableOrders}
                 navigate={navigate}
                 setChatItem={setChatItem}
+                setOrders={setOrders}
               />
 
-              {/* Cancelled Orders */}
+              {/* Cancelled Orders (No action buttons) */}
               <OrderSection
                 title="❌ Cancelled Orders"
                 orders={cancelledOrders}
                 navigate={navigate}
                 setChatItem={setChatItem}
+                setOrders={setOrders}
+                hideActions
               />
 
               {/* Accepted Orders */}
@@ -109,6 +112,7 @@ export default function ReceivedOrders() {
                 orders={acceptedOrders}
                 navigate={navigate}
                 setChatItem={setChatItem}
+                setOrders={setOrders}
               />
             </CardContent>
           </Card>
@@ -116,11 +120,11 @@ export default function ReceivedOrders() {
       </div>
 
       {/* Right Side: Chat Window */}
-      <div className="w-1/4">
+      <div className="w-full md:w-1/4">
         <AnimatePresence>
           {chatItem && (
             <motion.div
-              className="fixed right-0 w-96 bg-white rounded-xl shadow-lg overflow-hidden"
+              className="fixed right-0 w-full md:w-96 bg-white rounded-xl shadow-lg overflow-hidden"
               initial={{ x: 200, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 200, opacity: 0 }}
@@ -136,7 +140,14 @@ export default function ReceivedOrders() {
 }
 
 /* Order Section Component */
-function OrderSection({ title, orders, navigate, setChatItem }) {
+function OrderSection({
+  title,
+  orders,
+  navigate,
+  setChatItem,
+  setOrders,
+  hideActions = false,
+}) {
   return (
     <div className="mt-6">
       <h2 className="text-lg font-semibold text-gray-700 mb-2">{title}</h2>
@@ -150,6 +161,8 @@ function OrderSection({ title, orders, navigate, setChatItem }) {
               order={order}
               navigate={navigate}
               setChatItem={setChatItem}
+              setOrders={setOrders}
+              hideActions={hideActions}
             />
           ))}
         </ul>
@@ -157,9 +170,42 @@ function OrderSection({ title, orders, navigate, setChatItem }) {
     </div>
   );
 }
+function OrderItem({ order, navigate, setChatItem, setOrders }) {
+  const handleUpdateStatus = async (newStatus, e) => {
+    e.stopPropagation(); // Prevent navigation to product page
 
-/* Order Item Component */
-function OrderItem({ order, navigate, setChatItem }) {
+    try {
+      const idToken = localStorage.getItem("idToken");
+
+      const response = await fetch(
+        `${VITE_BACKEND_URL}/transactions/updateTransaction?tranStatus=${newStatus}&tranId=${order.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        toast.success(`Order ${newStatus === 2 ? "Accepted" : "Cancelled"}`);
+        setOrders((prevOrders) =>
+          prevOrders.map((o) =>
+            o.id === order.id ? { ...o, confirmation: newStatus } : o
+          )
+        );
+      } else {
+        toast.error("Failed to update order.");
+      }
+    } catch (error) {
+      console.error("Error updating order:", error);
+      toast.error("An error occurred. Please try again.");
+    }
+  };
+
   return (
     <li
       className="relative flex flex-col sm:flex-row items-center justify-between p-4 bg-white rounded-lg shadow-md border cursor-pointer transition-transform transform hover:scale-105"
@@ -173,16 +219,37 @@ function OrderItem({ order, navigate, setChatItem }) {
         </p>
       </div>
       <div className="flex items-center space-x-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            setChatItem(order);
-          }}
-        >
-          <MessageCircle className="h-6 w-6 text-purple-600" />
-        </Button>
+        {order.confirmation === 0 && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => handleUpdateStatus(2, e)}
+            >
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => handleUpdateStatus(3, e)}
+            >
+              <XCircle className="h-6 w-6 text-red-600" />
+            </Button>
+          </>
+        )}
+
+        {order.confirmation === 2 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              setChatItem(order);
+            }}
+          >
+            <MessageCircle className="h-6 w-6 text-purple-600" />
+          </Button>
+        )}
       </div>
     </li>
   );

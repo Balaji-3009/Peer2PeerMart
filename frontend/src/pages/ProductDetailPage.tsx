@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -107,77 +108,102 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-500 font-medium">Loading product details...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6 relative pt-24">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col items-center p-6 relative pt-24">
       <Sidebar />
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <Card className="w-full max-w-4xl overflow-hidden shadow-lg">
-        <CardHeader className="p-0">
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-[50vh] object-contain bg-white p-4"
-          />
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="mb-4">
-            <h1 className="text-4xl font-extrabold text-violet-700 mb-2">
-              {product.name}
-            </h1>
-            <p className="text-lg text-gray-700 font-serif">
-              {product.longDescription}
-            </p>
-          </div>
-          <p className="text-2xl font-bold text-purple-600 mb-4">
-            &#8377;{product.price.toFixed(2)}
-          </p>
-
-          {product.specs.length > 0 && (
-            <>
-              <h2 className="text-xl font-semibold text-violet-700 mb-2">
-                Specifications:
-              </h2>
-              <ul className="list-disc pl-5 mb-6">
-                {product.specs.map((spec, index) => (
-                  <li key={index} className="text-gray-600">
-                    {spec}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </CardContent>
-        <CardFooter className="bg-gray-50 p-6 flex flex-wrap gap-4">
-          <Button
-            className="bg-violet-700 hover:bg-violet-800 text-white font-semibold px-6 py-2"
-            onClick={handleAddToWishlist}
-            disabled={wishlistAdded}
-          >
-            {wishlistAdded ? "Added to Wishlist" : "Add to Wishlist"}
-          </Button>
-          <Button
-            variant="outline"
-            className="border-red-600 text-red-600 hover:bg-red-100 font-semibold px-6 py-2"
-            onClick={() => setIsReportModalOpen(true)}
-          >
-            Report Seller
-          </Button>
+      <div className="w-full max-w-5xl mx-auto animate-fade">
+        <div className="mb-8 animate-slide">
           <Button
             variant="ghost"
-            className="text-gray-600 hover:text-gray-900 px-6 py-2"
+            className="text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors mb-6"
             onClick={() => navigate("/products")}
           >
-            Back to Products
+            ← Back to Products
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="animate-scale">
+            <div className="bg-white rounded-2xl overflow-hidden shadow-lg">
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-full aspect-square object-contain p-8"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col animate-slide" style={{ animationDelay: "0.2s" }}>
+            <div className="mb-2">
+              <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                {product.user_name ? `Sold by ${product.user_name}` : "For Sale"}
+              </div>
+              <h1 className="text-4xl font-bold text-gray-800 tracking-tight mb-4">
+                {product.name}
+              </h1>
+              <p className="text-3xl font-bold text-primary mb-6">
+                ₹{product.price.toFixed(2)}
+              </p>
+            </div>
+
+            <div className="glass p-6 rounded-xl mb-8">
+              <h2 className="text-lg font-medium text-gray-800 mb-3">Description</h2>
+              <p className="text-gray-600 leading-relaxed">
+                {product.longDescription}
+              </p>
+            </div>
+
+            {product.specs.length > 0 && (
+              <div className="glass p-6 rounded-xl mb-8">
+                <h2 className="text-lg font-medium text-gray-800 mb-4">Specifications</h2>
+                <ul className="space-y-2">
+                  {product.specs.map((spec, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3"></div>
+                      <span className="text-gray-600">{spec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="mt-auto space-y-4">
+              <Button
+                className={`w-full py-6 rounded-xl text-base font-medium transition-all duration-300 ${
+                  wishlistAdded
+                    ? "bg-green-50 text-green-600 border border-green-200"
+                    : "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                }`}
+                onClick={handleAddToWishlist}
+                disabled={wishlistAdded}
+              >
+                {wishlistAdded ? "Added to Wishlist ✓" : "Add to Wishlist"}
+              </Button>
+              
+              <div className="flex gap-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 py-4 border-red-300 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-xl font-medium"
+                  onClick={() => setIsReportModalOpen(true)}
+                >
+                  Report Seller
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <ReportSellerModal
         isOpen={isReportModalOpen}
