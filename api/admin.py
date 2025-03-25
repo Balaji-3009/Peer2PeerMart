@@ -107,7 +107,7 @@ async def banUser(userId: str, db: db_dependency, request: Request, user_data = 
         raise HTTPException(status_code=500, detail=str(e))
     
 @adminRouter.put('/unBanUser')
-async def banUser(userId: str, db: db_dependency, request: Request, user_data = Depends(verify_token)):
+async def unBanUser(userId: str, db: db_dependency, request: Request, user_data = Depends(verify_token)):
     try:
         fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
         if not fetchedUser:
