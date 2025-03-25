@@ -73,6 +73,8 @@ async def getReports(db: db_dependency, user_data = Depends(verify_token)):
             single_report["desc"] = fetchedProduct.desc
             single_report["image"] = fetchedProduct.image
             single_report["reason"] = report.reason
+            single_report["created_at"] = report.createdAt
+            single_report["updated_at"] = report.updatedAt
             all_reports.append(single_report)
         if not fetchedReports:
             raise HTTPException(status_code=404, detail="Reports not found")
