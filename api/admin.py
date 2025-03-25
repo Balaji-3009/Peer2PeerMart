@@ -9,7 +9,7 @@ adminRouter = APIRouter()
 
 
 @adminRouter.get("/getAllUsers")
-async def getAllUsers(db: db_dependency):
+async def getAllUsers(db: db_dependency, user_data = Depends(verify_token)):
     try:
         fetchedUsers = db.query(Users).all()
         if not fetchedUsers:
@@ -24,7 +24,7 @@ async def getAllUsers(db: db_dependency):
 
 
 @adminRouter.get("/getAllProducts")
-async def getAllProducts(db: db_dependency):
+async def getAllProducts(db: db_dependency, user_data = Depends(verify_token)):
     try:
         all_products = []
         fetchedProducts = db.query(Products).all()
@@ -54,7 +54,7 @@ async def getAllProducts(db: db_dependency):
     
 
 @adminRouter.get("/getReports")
-async def getReports(db: db_dependency):
+async def getReports(db: db_dependency, user_data = Depends(verify_token)):
     try:
         all_reports = []
         fetchedReports = db.query(Reports).all()
@@ -82,4 +82,47 @@ async def getReports(db: db_dependency):
             "data": all_reports
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@adminRouter.put('/banUser')
+async def banUser(userId: str, db: db_dependency, request: Request, user_data = Depends(verify_token)):
+    try:
+        fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
+        if not fetchedUser:
+            raise HTTPException(status_code=404, detail="User not found")
+        fetchedUser.banned = 1
+        
+        db.commit()
+        
+        fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
+        
+        return {
+            "status": "success",
+            "message": "User banned successfully",
+            "data": fetchedUser
+        }
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@adminRouter.put('/unBanUser')
+async def banUser(userId: str, db: db_dependency, request: Request, user_data = Depends(verify_token)):
+    try:
+        fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
+        if not fetchedUser:
+            raise HTTPException(status_code=404, detail="User not found")
+        fetchedUser.banned = 0
+        
+        db.commit()
+        
+        fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
+        
+        return {
+            "status": "success",
+            "message": "User unbanned successfully",
+            "data": fetchedUser
+        }
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
