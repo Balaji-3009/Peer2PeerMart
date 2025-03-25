@@ -46,7 +46,10 @@ async def getUser(userId: str, db: db_dependency, user_data = Depends(verify_tok
     try:
         fetchedUser = db.query(Users).filter(Users.uuid == userId).first()
         if not fetchedUser:
-            raise HTTPException(status_code=404, detail="User not found")
+            return {
+                "status": "404",
+                "message": "User not found"
+            }
         return {
             "status": "success",
             "message": "User fetched successfully",
