@@ -47,16 +47,17 @@ class Products(Base):
     createdAt = Column(DateTime, default=func.now())
     updatedAt = Column(DateTime, default=func.now(), onupdate=func.now())
     
-    entry = relationship("Entry", back_populates="product")
-    transaction = relationship("Transactions", back_populates="product")
-    report = relationship("Reports", back_populates="product")
+    entry = relationship("Entry", back_populates="product", cascade="all, delete", passive_deletes=True)
+    transaction = relationship("Transactions", back_populates="product", cascade="all, delete", passive_deletes=True)
+    report = relationship("Reports", back_populates="product", cascade="all, delete", passive_deletes=True)
+    chat = relationship("Chat", back_populates="product", cascade="all, delete", passive_deletes=True)
     
 class Transactions(Base):
     
     __tablename__ = 'transactions'
     id = Column(Integer, primary_key= True, index= True)
     user_id = Column(String, ForeignKey("entry.uuid"))
-    product_id = Column(Integer, ForeignKey("products.id"))
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"))
     price = Column(String)
     confirmation = Column(Integer, default=0)
     createdAt = Column(DateTime, default=func.now())
@@ -71,17 +72,18 @@ class Chat(Base):
     chat_id = Column(Integer, primary_key=True)
     buyer_id = Column(String, ForeignKey('entry.uuid'))
     seller_id = Column(String, ForeignKey('entry.uuid'))
-    product_id = Column(Integer, ForeignKey('products.id'))
+    product_id = Column(Integer, ForeignKey('products.id', ondelete="CASCADE"))
     
     buyer = relationship("Entry", back_populates="buyer_chats", foreign_keys=[buyer_id])
     seller = relationship("Entry", back_populates="seller_chats", foreign_keys=[seller_id])
     message = relationship("Message", back_populates="chat")
+    product = relationship("Products", back_populates="chat")
 
 class Message(Base):
     
     __tablename__ = 'messages'
     message_id = Column(Integer, primary_key=True)
-    chat_id = Column(Integer, ForeignKey('chats.chat_id'))
+    chat_id = Column(Integer, ForeignKey('chats.chat_id', ondelete="CASCADE"))
     sender_id = Column(String, ForeignKey('entry.uuid'))
     content = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now())
@@ -94,7 +96,7 @@ class Reports(Base):
     __tablename__ = 'reports'
     report_id = Column(Integer, primary_key=True)
     user_id = Column(String, ForeignKey("entry.uuid"))
-    product_id = Column(Integer, ForeignKey('products.id'))
+    product_id = Column(Integer, ForeignKey('products.id', ondelete="CASCADE"))
     reason = Column(String)
     createdAt = Column(DateTime, default=func.now())
     updatedAt = Column(DateTime, default=func.now(), onupdate=func.now())
