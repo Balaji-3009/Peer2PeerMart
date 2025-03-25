@@ -2,21 +2,17 @@
 
 import { useState, useEffect } from "react";
 import {
-//   Package,
-//   ShoppingCart,
-//   Heart,
   ChevronRight,
   ChevronLeft,
-  ClipboardList,
+  // ClipboardList,
   Home,
+  Users as UsersIcon,
+  FileText,
 } from "lucide-react";
 import { Button } from "./ui/button";
-// import { useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
-// import { NavBar } from "./NavBar"; // Import the NavBar component
 
 const Sidebar = () => {
-//   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -33,21 +29,13 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: <Home className="h-5 w-5" />, label: "Home", href: "/dashboard" },
-    {
-      icon: <ClipboardList className="h-5 w-5" />,
-      label: "Users",
-      href: "/users",
-    },
+    { icon: <UsersIcon className="h-5 w-5" />, label: "Users", href: "/users" },
+    { icon: <FileText className="h-5 w-5" />, label: "Reports", href: "/reports" },
   ];
 
   return (
     <>
       <Toaster richColors position="top-right" />
-
-      {/* Top Navbar */}
-      {/* <NavBar /> */}
-
-      {/* Sidebar for Desktop */}
       {!isMobile ? (
         <div
           className={`fixed left-0 top-0 h-full bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col z-20 pt-16 ${
@@ -84,7 +72,6 @@ const Sidebar = () => {
           </div>
         </div>
       ) : (
-        /* Mobile Bottom Navbar */
         <div className="fixed bottom-0 left-0 w-full bg-white shadow-lg flex justify-around py-3 z-20">
           {menuItems.map((item, index) => (
             <a
