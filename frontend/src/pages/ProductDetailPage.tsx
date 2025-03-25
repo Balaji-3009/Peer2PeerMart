@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -111,7 +110,9 @@ export default function ProductDetailPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
         <div className="flex flex-col items-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-500 font-medium">Loading product details...</p>
+          <p className="text-gray-500 font-medium">
+            Loading product details...
+          </p>
         </div>
       </div>
     );
@@ -144,10 +145,15 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="flex flex-col animate-slide" style={{ animationDelay: "0.2s" }}>
+          <div
+            className="flex flex-col animate-slide"
+            style={{ animationDelay: "0.2s" }}
+          >
             <div className="mb-2">
               <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                {product.user_name ? `Sold by ${product.user_name}` : "For Sale"}
+                {product.user_name
+                  ? `Sold by ${product.user_name}`
+                  : "For Sale"}
               </div>
               <h1 className="text-4xl font-bold text-gray-800 tracking-tight mb-4">
                 {product.name}
@@ -158,7 +164,9 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="glass p-6 rounded-xl mb-8">
-              <h2 className="text-lg font-medium text-gray-800 mb-3">Description</h2>
+              <h2 className="text-lg font-medium text-gray-800 mb-3">
+                Description
+              </h2>
               <p className="text-gray-600 leading-relaxed">
                 {product.longDescription}
               </p>
@@ -166,7 +174,9 @@ export default function ProductDetailPage() {
 
             {product.specs.length > 0 && (
               <div className="glass p-6 rounded-xl mb-8">
-                <h2 className="text-lg font-medium text-gray-800 mb-4">Specifications</h2>
+                <h2 className="text-lg font-medium text-gray-800 mb-4">
+                  Specifications
+                </h2>
                 <ul className="space-y-2">
                   {product.specs.map((spec, index) => (
                     <li key={index} className="flex items-start">
@@ -190,7 +200,7 @@ export default function ProductDetailPage() {
               >
                 {wishlistAdded ? "Added to Wishlist ✓" : "Add to Wishlist"}
               </Button>
-              
+
               <div className="flex gap-4">
                 <Button
                   variant="outline"
@@ -208,7 +218,7 @@ export default function ProductDetailPage() {
       <ReportSellerModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
-        onSubmit={handleReportSubmit}
+        productId={product.id} // Pass the product ID directly
       />
     </div>
   );
