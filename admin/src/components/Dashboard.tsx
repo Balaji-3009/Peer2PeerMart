@@ -1,31 +1,32 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Card, CardContent } from '../components/ui';
-import Sidebar from './Sidebar';
-import { useNavigate } from 'react-router-dom';
-import { Input, Button } from '../components/ui';
-import { Filter, Search } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
-import { Slider } from '../components/ui/slider';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "../components/ui/card";
+import NavBar from "../components/Navbar";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Filter, Search } from "lucide-react";
+import Sidebar from "../components/Sidebar";
+// import img from "../assets/placeholder.png";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../components/ui/popover";
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  desc: string;
-  image: string;
-  negotiable: number;
-  user_name: string;
-}
-
-function Dashboard() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [priceRange, setPriceRange] = useState([0, 100]);
+export default function ProductsPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 100]); // Default until data loads
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(100);
   const navigate = useNavigate();
-  const userId = "s9dBDmERh9hA2WX1M2vrVZdZ3Um1";
-  const authToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjMwYjIyMWFiNjU2MTdiY2Y4N2VlMGY4NDYyZjc0ZTM2NTIyY2EyZTQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiR29rdWwgMjJCQ0UyOTQ1IiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0t0UVBQSV9XRnIzZXFfaFF3cndSSzRCQ0RpcHM3Mk9qaEVaenVSYURzZ0tZdHFqZz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9wMnBtYXJ0LTExOTMxIiwiYXVkIjoicDJwbWFydC0xMTkzMSIsImF1dGhfdGltZSI6MTc0MjkyMjAxMCwidXNlcl9pZCI6InM5ZEJEbUVSaDloQTJXWDFNMnZyVlpkWjNVbTEiLCJzdWIiOiJzOWRCRG1FUmg5aEEyV1gxTTJ2clZaZFozVW0xIiwiaWF0IjoxNzQyOTIyMDEwLCJleHAiOjE3NDI5MjU2MTAsImVtYWlsIjoiZ29rdWwuMjAyMkB2aXRzdHVkZW50LmFjLmluIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMTU5MTIxMzUyNDQzNDU3MzM3MDMiXSwiZW1haWwiOlsiZ29rdWwuMjAyMkB2aXRzdHVkZW50LmFjLmluIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.tW9ebvaGOsXB46nl9QbYlJr1jejY4Yc37U3DCHTbObgoNlpn5fZ1ZLOIGRmQ9Ipd9OxzfLcWovGBUl9WgsBmZhl5iLlwfQRQ0TOBx7X-V7EcURcoZC-qAQvGdZ5ROnRcyegY_9JEw9ixKjIl1r_10s1hRPXjpD1t7EFKoMOvkGk2SfJIJ1k-X6QxFJmah2b9JApjgj7wNkEEFbjxR1_bPpAC_yNxEgRH9uSWDI3C1rfImksliPKaZn06HCDdOqXoC9Z26cuqskl8rYFSaO0HjkoCPjRJ4VY_rTx7ufwCLS_c1sNosna2hmanwQwPBgKOjCOdhxT4ArGPrBT2RoTXVg";
 
   useEffect(() => {
     fetchProducts();
@@ -33,63 +34,88 @@ function Dashboard() {
 
   useEffect(() => {
     filterProducts();
-  }, [searchTerm, priceRange, products]);
+  }, [searchTerm, priceRange, products]); // Re-run filter when searchTerm, priceRange, or products change
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('https://peer2peermart-y0wq.onrender.com/products/getProducts', {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`
-        },
-        params: {
-          user_id: userId
+      const idToken = localStorage.getItem("idToken");
+      // const uuid = localStorage.getItem("uuid");
+      if (!idToken) {
+        console.error("No ID token found in localStorage");
+        return;
+      }
+
+      const response = await fetch(
+        `${VITE_BACKEND_URL}/admin/getAllProducts`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
         }
-      });
-      const data = response.data.data;
-      const formattedProducts = data.map((product: Product) => ({
-        ...product,
-        price: parseFloat(product.price) || 0,
-      }));
-      setProducts(formattedProducts);
-      setFilteredProducts(formattedProducts);
-      const maxPrice = Math.max(...formattedProducts.map((p: Product) => p.price), 100);
-      setPriceRange([0, maxPrice]);
+      );
+
+      const data = await response.json();
+      if (data.status === "success") {
+        const formattedProducts = data.data
+          .filter((product) => product.name && product.price) // Remove incomplete products
+          .map((product) => ({
+            id: product.id,
+            name: product.name || "Unnamed Product",
+            description: product.desc || "No description available",
+            image: product.image,
+            price: parseFloat(product.price) || 0,
+          }));
+
+        setProducts(formattedProducts);
+        setFilteredProducts(formattedProducts); // Initialize filteredProducts with all products
+
+        // Dynamically set min and max price based on fetched products
+        const prices = formattedProducts.map((p) => p.price);
+        const calculatedMinPrice = Math.min(...prices, 0); // Minimum price or default to 0
+        const calculatedMaxPrice = Math.max(...prices, 100); // Maximum price or default to 100
+
+        setMinPrice(calculatedMinPrice);
+        setMaxPrice(calculatedMaxPrice);
+        setPriceRange([calculatedMinPrice, calculatedMaxPrice]); // Initialize range with min/max
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching products:", error);
     }
   };
 
   const filterProducts = () => {
     const filtered = products.filter(
-      product =>
+      (product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        parseFloat(product.price) >= priceRange[0] &&
-        parseFloat(product.price) <= priceRange[1]
+        product.price >= priceRange[0] &&
+        product.price <= priceRange[1]
     );
     setFilteredProducts(filtered);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  const handlePriceChange = (range: number[]) => {
-    setPriceRange(range);
+  const handlePriceChange = (index) => (e) => {
+    const newRange = [...priceRange];
+    newRange[index] = Number(e.target.value);
+    setPriceRange(newRange);
   };
 
   return (
-    <div>
-      <Sidebar />
-    <div className="m-12 min-h-screen bg-gray-100 flex pt-28">
+    <div className="min-h-screen bg-gray-100 flex pt-28">
 
-      <div className="flex-1 p-10">
+      <Sidebar />
+      <div className="flex-1 p-6">
         <div className="space-y-8 w-full max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-center text-gray-800">
             Best Finds on Campus
           </h1>
           <div className="flex justify-center">
             <div className="relative w-full max-w-xl">
+              {/* Search Bar */}
               <Input
                 type="text"
                 placeholder="Search for amazing products..."
@@ -97,7 +123,8 @@ function Dashboard() {
                 onChange={handleSearchChange}
                 className="pr-20 rounded-full"
               />
-              <div className="absolute right-0 top-0 bottom-0 flex items-center">
+              <div className="absolute right-0 top-0 bottom-0 flex">
+                {/* Filter Popover */}
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -110,40 +137,71 @@ function Dashboard() {
                   <PopoverContent className="w-80 bg-white shadow-lg rounded-lg p-4 border border-gray-300">
                     <div className="space-y-4">
                       <h4 className="font-medium">Filter by Price</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>&#8377;{priceRange[0]}</span>
-                          <span>&#8377;{priceRange[1]}</span>
-                        </div>
-                        <Slider
-                          max={priceRange[1]}
-                          step={1}
-                          value={priceRange}
-                          onValueChange={handlePriceChange}
-                          className="my-4"
+
+                      {/* Price Range Display */}
+                      <div className="flex justify-between text-sm font-medium text-gray-700">
+                        <span>From ₹{priceRange[0]}</span>
+                        <span>To ₹{priceRange[1]}</span>
+                      </div>
+
+                      {/* Price Range Slider */}
+                      <div className="slider-container">
+                        <input
+                          type="range"
+                          min={minPrice} // Dynamic min value
+                          max={maxPrice} // Dynamic max value
+                          value={priceRange[0]}
+                          onChange={handlePriceChange(0)}
+                          className="slider min-slider "
                         />
+                        <input
+                          type="range"
+                          min={minPrice} // Dynamic min value
+                          max={maxPrice} // Dynamic max value
+                          value={priceRange[1]}
+                          onChange={handlePriceChange(1)}
+                          className="slider max-slider"
+                        />
+                        <div className="slider-track"></div>
                       </div>
                     </div>
                   </PopoverContent>
                 </Popover>
+
+                {/* Search Button */}
                 <Button className="rounded-full">
                   <Search className="h-5 w-5" />
                 </Button>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+          {/* Product Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
             {filteredProducts.length > 0 ? (
-              filteredProducts.map(product => (
-                <Card key={product.id} onClick={() => navigate(`/product/${product.id}`)} className="cursor-pointer">
+              filteredProducts.map((product) => (
+                <Card key={product.id}>
+                  <CardHeader>
+                    <h3 className="text-lg font-semibold">{product.name}</h3>
+                  </CardHeader>
                   <CardContent>
                     <img
-                      src={product.image}
+                      src={product.image || img}
                       alt={product.name}
                       className="w-full h-48 object-cover rounded-md mb-4"
                     />
-                    <p className="text-gray-500">{product.desc}</p>
                   </CardContent>
+                  <CardFooter className="justify-between items-center">
+                    <span className="text-base font-medium">
+                      &#8377;{product.price.toFixed(2)}
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/product/${product.id}`)}
+                    >
+                      View Details
+                    </Button>
+                  </CardFooter>
                 </Card>
               ))
             ) : (
@@ -155,8 +213,5 @@ function Dashboard() {
         </div>
       </div>
     </div>
-    </div>
   );
 }
-
-export default Dashboard;
