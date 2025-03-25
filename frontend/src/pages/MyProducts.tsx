@@ -103,7 +103,7 @@ export default function MyProducts() {
       <div className="flex-1 p-8 animate-fade">
         <div className="w-full max-w-5xl mx-auto">
           <div className="glass rounded-2xl overflow-hidden shadow-xl mb-12">
-            <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-8">
+            <div className="bg-purple-600 from-primary to-primary/80 text-white p-8">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 <div>
                   <div className="inline-block px-3 py-1 rounded-full bg-white/20 text-white text-sm font-medium mb-4">

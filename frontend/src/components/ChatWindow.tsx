@@ -18,7 +18,7 @@ export default function ChatWindow({ item, onClose }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
-    }, 50);
+    }, 100);
     return () => clearTimeout(timer);
   }, []);
 

@@ -14,7 +14,7 @@ const firebaseConfig = {
   storageBucket: "p2pmart-11931.appspot.com",
   messagingSenderId: "518764149584",
   appId: "1:518764149584:web:64ab8c43d196d24d684a55",
-  measurementId: "G-XK6H06303L"
+  measurementId: "G-XK6H06303L",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -58,7 +58,7 @@ const AuthPage = () => {
     }
   }
 
-  async function fetchUserDetails(uuid, idToken) {
+  async function fetchUserDetails(uuid: string, idToken: string) {
     try {
       const response = await fetch(
         `${VITE_BACKEND_URL}/users/getUser/${uuid}`,
@@ -71,15 +71,27 @@ const AuthPage = () => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("User not found");
+      const data = await response.json();
+
+      // Handle 404 specifically
+      if (response.status === 404 || data.status === "404") {
+        toast.error("Please complete your profile");
+        navigate("/details");
+        return;
       }
 
-      const userData = await response.json();
+      // For other error statuses
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch user details");
+      }
+
+      // Success case - user exists
       navigate("/products");
     } catch (error) {
-      toast.error("Please complete your profile");
-      navigate("/details");
+      console.error("Error fetching user details:", error);
+      toast.error("Error fetching user details");
+      // Optional: navigate to login or retry
+      // navigate("/login");
     }
   }
 
@@ -88,24 +100,43 @@ const AuthPage = () => {
       <div className="w-full max-w-md animate-scale">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-6 animate-fade">
-            <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <svg
+              className="w-10 h-10 text-primary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+              />
             </svg>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-800 mb-3">P2PMart</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-gray-800 mb-3">
+            P2PMart
+          </h1>
           <p className="text-gray-500 max-w-md mx-auto">
-            The campus marketplace for students to buy and sell books, gadgets, and essentials
+            The campus marketplace for students to buy and sell books, gadgets,
+            and essentials
           </p>
         </div>
-        
-        <div className="glass rounded-2xl overflow-hidden shadow-xl p-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+
+        <div
+          className="glass rounded-2xl overflow-hidden shadow-xl p-8 animate-slide-up"
+          style={{ animationDelay: "0.2s" }}
+        >
           <div className="text-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Join Your Campus Marketplace</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Join Your Campus Marketplace
+            </h2>
             <p className="text-gray-500 text-sm">
               Sign in with your college Google account to get started
             </p>
           </div>
-          
+
           <button
             onClick={googleSignIn}
             disabled={loading}
@@ -118,15 +149,26 @@ const AuthPage = () => {
               />
             </svg>
             <span>Continue with Google</span>
-            
+
             <div className="absolute inset-0 h-full w-full scale-0 rounded-xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/10"></div>
           </button>
-          
+
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-500">
               By signing in, you agree to our{" "}
-              <Link to="/terms" className="text-primary hover:underline font-medium">Terms</Link> and{" "}
-              <Link to="/privacy" className="text-primary hover:underline font-medium">Privacy Policy</Link>
+              <Link
+                to="/terms"
+                className="text-primary hover:underline font-medium"
+              >
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link
+                to="/privacy"
+                className="text-primary hover:underline font-medium"
+              >
+                Privacy Policy
+              </Link>
             </p>
           </div>
         </div>
@@ -136,7 +178,9 @@ const AuthPage = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50 animate-fade">
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-600 font-medium">Connecting to your account...</p>
+            <p className="text-gray-600 font-medium">
+              Connecting to your account...
+            </p>
           </div>
         </div>
       )}

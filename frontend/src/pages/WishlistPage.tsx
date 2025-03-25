@@ -10,10 +10,34 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+interface WishlistItem {
+  id: number;
+  productName: string;
+  price: number;
+  buyer_id: string;
+  seller_id: string;
+  product_id: number;
+  sellerName: string;
+  confirmation: number; // 0 - active, 2 - accepted, 3 - canceled
+}
+
 export default function WishlistPage() {
   const navigate = useNavigate();
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [chatItem, setChatItem] = useState(null);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [chatItem, setChatItem] = useState<WishlistItem | null>(null);
+  const [enableAnimations, setEnableAnimations] = useState<boolean>(
+    window.innerWidth > 768
+  );
+
+  // Handle screen resize to enable/disable animations
+  useEffect(() => {
+    const handleResize = () => {
+      setEnableAnimations(window.innerWidth > 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -40,7 +64,7 @@ export default function WishlistPage() {
 
         if (data.status === "success") {
           setWishlistItems(
-            data.data.map((item) => ({
+            data.data.map((item: any) => ({
               id: item.id,
               productName: item.product_name,
               price: item.price,
@@ -48,7 +72,7 @@ export default function WishlistPage() {
               seller_id: item.seller_id,
               product_id: Number(item.product_id),
               sellerName: item.seller_name,
-              confirmation: item.confirmation, // 0 - active, 2 - accepted, 3 - canceled
+              confirmation: item.confirmation,
             }))
           );
         } else {
@@ -62,7 +86,7 @@ export default function WishlistPage() {
     fetchWishlist();
   }, []);
 
-  const cancelProduct = async (tranId) => {
+  const cancelProduct = async (tranId: number) => {
     try {
       const idToken = localStorage.getItem("idToken");
       const response = await fetch(
@@ -105,63 +129,53 @@ export default function WishlistPage() {
 
   return (
     <div className="min-h-screen mt-16 bg-gray-50 flex flex-col md:flex-row p-4 md:p-6 relative pt-16">
-      {/* Sidebar (Collapsible for smaller screens) */}
+      {/* Sidebar */}
       <div className="w-full md:w-1/4 mb-6 md:mb-0">
         <Sidebar />
       </div>
 
-      {/* Middle Section (Wishlist Items) */}
+      {/* Middle Section: Wishlist */}
       <div className="w-full md:w-1/2 flex flex-col items-center">
         <Toaster position="top-right" />
-        <motion.div
-          className="w-full bg-white shadow-lg rounded-lg overflow-hidden transition-all"
-          animate={{ x: chatItem ? -100 : 0 }}
-          transition={{ type: "spring", stiffness: 100, damping: 15 }}
-        >
-          <Card>
-            <CardHeader className="bg-purple-600 text-white p-4 md:p-6 text-center">
-              <h1 className="text-2xl md:text-3xl font-bold">Your Wishlist</h1>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6">
-              {/* Active Wishlist */}
-              <WishlistSection
-                title="📌 Active Wishlist"
-                items={activeWishlist}
-                navigate={navigate}
-                cancelProduct={cancelProduct}
-                setChatItem={setChatItem}
-              />
-
-              {/* Canceled Wishlist */}
-              <WishlistSection
-                title="❌ Canceled Wishlist"
-                items={canceledWishlist}
-                navigate={navigate}
-                setChatItem={setChatItem}
-              />
-
-              {/* Accepted Wishlist */}
-              <WishlistSection
-                title="✅ Accepted Wishlist"
-                items={acceptedWishlist}
-                navigate={navigate}
-                setChatItem={setChatItem}
-              />
-            </CardContent>
-          </Card>
-        </motion.div>
+        {enableAnimations ? (
+          <motion.div
+            className="w-full bg-white shadow-lg rounded-lg overflow-hidden"
+            animate={{ x: chatItem ? -170 : 0 }}
+            transition={{ type: "spring", stiffness: 1000, damping: 3000 }}
+          >
+            <WishlistContent
+              activeWishlist={activeWishlist}
+              acceptedWishlist={acceptedWishlist}
+              canceledWishlist={canceledWishlist}
+              navigate={navigate}
+              cancelProduct={cancelProduct}
+              setChatItem={setChatItem}
+            />
+          </motion.div>
+        ) : (
+          <div className="w-full bg-white shadow-lg rounded-lg overflow-hidden">
+            <WishlistContent
+              activeWishlist={activeWishlist}
+              acceptedWishlist={acceptedWishlist}
+              canceledWishlist={canceledWishlist}
+              navigate={navigate}
+              cancelProduct={cancelProduct}
+              setChatItem={setChatItem}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Right Side: Chat Window (Full-width on small screens) */}
+      {/* Right Side: Chat Window */}
       <div className="w-full md:w-1/4">
         <AnimatePresence>
           {chatItem && (
             <motion.div
               className="fixed right-0 w-full md:w-96 bg-white rounded-xl shadow-lg overflow-hidden"
-              initial={{ x: 200, opacity: 0 }}
+              initial={{ x: enableAnimations ? 200 : 0, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 200, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 100, damping: 15 }}
+              exit={{ x: enableAnimations ? 200 : 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 3000 }}
             >
               <ChatWindow item={chatItem} onClose={() => setChatItem(null)} />
             </motion.div>
@@ -172,64 +186,107 @@ export default function WishlistPage() {
   );
 }
 
-/* Wishlist Section Component */
+/* Wishlist Content Component */
+function WishlistContent({
+  activeWishlist,
+  acceptedWishlist,
+  canceledWishlist,
+  navigate,
+  cancelProduct,
+  setChatItem,
+}: {
+  activeWishlist: WishlistItem[];
+  acceptedWishlist: WishlistItem[];
+  canceledWishlist: WishlistItem[];
+  navigate: any;
+  cancelProduct: (tranId: number) => void;
+  setChatItem: (item: WishlistItem | null) => void;
+}) {
+  return (
+    <Card>
+      <CardHeader className="bg-purple-600 text-white p-4 md:p-6 text-center">
+        <h1 className="text-2xl md:text-3xl font-bold">Your Wishlist</h1>
+      </CardHeader>
+      <CardContent className="p-4 md:p-6">
+        <WishlistSection
+          title="📌 Active Wishlist"
+          items={activeWishlist}
+          navigate={navigate}
+          cancelProduct={cancelProduct}
+          setChatItem={setChatItem}
+        />
+        <WishlistSection
+          title="🟢 Accepted Wishlist"
+          items={acceptedWishlist}
+          navigate={navigate}
+          setChatItem={setChatItem}
+        />
+        <WishlistSection
+          title="🔴 Canceled Wishlist"
+          items={canceledWishlist}
+          navigate={navigate}
+          setChatItem={setChatItem}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+/* WishlistSection Component */
 function WishlistSection({
   title,
   items,
   navigate,
   cancelProduct,
   setChatItem,
+}: {
+  title: string;
+  items: WishlistItem[];
+  navigate?: any;
+  cancelProduct?: (tranId: number) => void;
+  setChatItem?: (item: WishlistItem | null) => void;
 }) {
   return (
-    <div className="mt-6">
-      <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-2">
-        {title}
-      </h2>
-      {items.length === 0 ? (
-        <p className="text-gray-500">No items in this category.</p>
+    <div className="mb-6">
+      <h2 className="text-xl font-semibold mb-2">{title}</h2>
+      {items.length > 0 ? (
+        items.map((item) => (
+          <div
+            key={item.id}
+            className="p-3 mb-3 border rounded-lg hover:bg-gray-50"
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium">{item.productName}</p>
+                <p className="text-gray-600">${item.price}</p>
+                <p className="text-sm text-gray-500">
+                  Seller: {item.sellerName}
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                {item.confirmation === 0 && cancelProduct && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => cancelProduct(item.id)}
+                  >
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setChatItem && setChatItem(item)}
+                >
+                  <MessageCircle className="h-5 w-5 text-blue-500" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))
       ) : (
-        <ul className="space-y-4">
-          {items.map((item) => (
-            <WishlistItem
-              key={item.id}
-              item={item}
-              navigate={navigate}
-              cancelProduct={cancelProduct}
-              setChatItem={setChatItem}
-            />
-          ))}
-        </ul>
+        <p className="text-gray-500">No items available.</p>
       )}
     </div>
-  );
-}
-
-/* Wishlist Item Component */
-function WishlistItem({ item, navigate, cancelProduct, setChatItem }) {
-  return (
-    <li
-      className="relative flex flex-col md:flex-row items-center justify-between p-4 bg-white rounded-lg shadow-md border cursor-pointer transition-transform transform hover:scale-105"
-      onClick={() => navigate(`/product/${item.product_id}`)}
-    >
-      <div className="flex-1">
-        <h3 className="text-lg md:text-xl font-bold text-purple-700">
-          {item.productName}
-        </h3>
-        <p className="text-gray-600 text-sm">Seller: {item.sellerName}</p>
-        <p className="text-purple-600 font-medium text-lg md:text-xl">
-          &#x20B9;{item.price}
-        </p>
-      </div>
-      <div className="flex items-center space-x-3">
-        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setChatItem(item); }}>
-          <MessageCircle className="h-6 w-6 text-purple-600" />
-        </Button>
-        {item.confirmation === 0 && (
-          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); cancelProduct(item.id); }}>
-            <XCircle className="h-6 w-6 text-red-500" />
-          </Button>
-        )}
-      </div>
-    </li>
   );
 }

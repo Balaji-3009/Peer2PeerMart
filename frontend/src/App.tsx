@@ -18,6 +18,7 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import TermsPage from "./pages/Terms";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import DetailsUpdatePage from "./pages/DetailsUpdatePage";
 import "./App.css";
 
 // Create a wrapper component for protected routes
@@ -103,6 +104,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/detailsupdate"
+          element={
+            <ProtectedRoute>
+              <DetailsUpdatePage />
             </ProtectedRoute>
           }
         />
