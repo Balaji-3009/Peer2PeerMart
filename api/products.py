@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from database.session import db_dependency
-from database.models import Products, Users
-from database.schemas import ProductBase
+from database.models import Products, Users, Reports
+from database.schemas import ProductBase, ReportBase
 from .auth import verify_firebase_token
 from .user import verify_token
 
@@ -159,3 +159,22 @@ async def deleteProduct(productId: int, db: db_dependency, request: Request, use
         print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
+@productsRouter.post('/reportProduct')
+async def reportProduct(reports: ReportBase, db: db_dependency, request: Request):
+    try:
+        newReport = Reports(
+            user_id = reports.user_id,
+            product_id = reports.product_id,
+            reason = reports.reason
+        )
+        db.add(newReport)
+        db.commit()
+        db.refresh(newReport)
+        return {
+            "status": "success",
+            "message": "Report created successfully",
+            "data": newReport
+        }
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))

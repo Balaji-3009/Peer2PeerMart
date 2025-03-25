@@ -8,6 +8,7 @@ from api.user import usersRouter
 from api.products import productsRouter
 from api.transactions import transactionsRouter
 from api.chat import chatRouter
+from api.admin import adminRouter
 from fastapi.middleware.cors import CORSMiddleware
 from api.auth import verify_firebase_token, get_or_create_user, get_user_by_email
 
@@ -25,6 +26,7 @@ app.include_router(usersRouter, prefix="/users", tags=["users"])
 app.include_router(productsRouter, prefix="/products", tags=["products"])
 app.include_router(transactionsRouter, prefix="/transactions", tags=["transactions"])
 app.include_router(chatRouter, prefix="/chats", tags=["chats"])
+app.include_router(adminRouter, prefix="/admin", tags=["admin"])
 
 @app.get("/")
 async def root():
