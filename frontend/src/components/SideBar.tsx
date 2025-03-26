@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
-import { NavBar } from "./NavBar"; // Import the NavBar component
+import { NavBar } from "./NavBar";
 
 const SideBar = () => {
   const navigate = useNavigate();
@@ -59,8 +59,7 @@ const SideBar = () => {
     <>
       <Toaster richColors position="top-right" />
 
-      {/* Top Navbar */}
-      <NavBar />
+      <NavBar onEditProduct={undefined} />
 
       {/* Sidebar for Desktop */}
       {!isMobile ? (
@@ -101,18 +100,23 @@ const SideBar = () => {
         </div>
       ) : (
         /* Mobile Bottom Navbar */
-        <div className="fixed bottom-0 left-0 w-full bg-white shadow-lg flex justify-around py-3 z-20">
-          {menuItems.map((item, index) => (
-            <a
-              key={index}
-              href={item.href}
-              className="flex flex-col items-center text-gray-700 hover:text-purple-600"
-            >
-              {item.icon}
-              <span className="text-xs mt-1">{item.label}</span>
-            </a>
-          ))}
-        </div>
+        <>
+          {/* Add margin to main content to avoid clash with bottom navbar */}
+          <div className="pb-16"></div>
+
+          <div className="fixed bottom-0 left-0 w-full  bg-white shadow-lg flex justify-around py-3 z-20 mt-4">
+            {menuItems.map((item, index) => (
+              <a
+                key={index}
+                href={item.href}
+                className="flex flex-col items-center text-gray-700 hover:text-purple-600"
+              >
+                {item.icon}
+                <span className="text-xs mt-1">{item.label}</span>
+              </a>
+            ))}
+          </div>
+        </>
       )}
     </>
   );

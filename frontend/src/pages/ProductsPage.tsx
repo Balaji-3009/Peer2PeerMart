@@ -104,9 +104,9 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex pt-28">
+    <div className="min-h-screen bg-gray-100 flex pt-28 ">
       <Sidebar />
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 pb-20 ">
         <div className="space-y-8 w-full max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-center text-gray-800">
             Best Finds on Campus

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "./dist",
     "jsx": "react-jsx", // Enable JSX support
     "target": "ES2020", // Target JavaScript version
     "module": "ESNext", // Use ES modules
