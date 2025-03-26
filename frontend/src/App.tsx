@@ -22,7 +22,8 @@ import DetailsUpdatePage from "./pages/DetailsUpdatePage";
 import "./App.css";
 
 // Create a wrapper component for protected routes
-function ProtectedRoute({ children }) {
+// Add proper type for children
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const uuid = localStorage.getItem("uuid");
   const location = useLocation();
 

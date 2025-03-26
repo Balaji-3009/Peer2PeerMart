@@ -15,7 +15,11 @@ import Sidebar from "../components/Sidebar";
 import { useToast } from "@/hooks/use-toast";
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
+interface ProductFormData {
+  name: string;
+  price: string;
+  // ... other fields
+}
 export default function CreateProductPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -30,7 +34,7 @@ export default function CreateProductPage() {
     imageUrl: "", // Store uploaded image URL
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setProductData((prev) => ({
       ...prev,
@@ -158,7 +162,8 @@ export default function CreateProductPage() {
   return (
     <div className="min-h-screen flex bg-gradient-to-b from-white to-violet-50 pt-24">
       <Sidebar />
-      <div className="flex-1 p-6 md:p-10 animate-fade-in">
+
+      <div className="flex-1 p-6 animate-fade-in md:pd-16">
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl border-violet-200 overflow-hidden transition-all duration-300 hover:shadow-violet-200/50">
             <CardHeader className="bg-gradient-to-r from-violet-600 to-purple-700 text-white p-6">

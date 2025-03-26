@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 
-export const NavBar = ({ onEditProduct }) => {
+export const NavBar = ({ onEditProduct }: { onEditProduct?: () => void }) => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<{
     name: string;

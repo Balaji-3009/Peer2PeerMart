@@ -8,8 +8,16 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-export default function EditProductDetails({ product, onClose, onUpdate }) {
+interface EditProductDetailsProps {
+  product: Array; // Replace with proper product interface
+  onClose: () => void;
+  onUpdate: (updatedProduct: any) => void;
+}
+export default function EditProductDetails({
+  product,
+  onClose,
+  onUpdate,
+}: EditProductDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",

@@ -40,7 +40,21 @@ const AuthPage = () => {
         body: JSON.stringify({ idToken }),
       });
 
+      // Check for 403 status first
+      if (response.status === 403) {
+        toast.error(
+          "Please use your VIT student email (@vitstudent.ac.in) to login"
+        );
+        navigate("/login");
+        return;
+      }
+
+      // If not 403, proceed with normal flow
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
       if (data.uuid) {
         localStorage.setItem("uuid", data.uuid);
         toast.success("Login successful!");
@@ -52,7 +66,8 @@ const AuthPage = () => {
         toast.error("Login failed. Please try again.");
       }
     } catch (error) {
-      toast.error("Google Sign-In failed. Please try again.");
+      console.error("Google Sign-In error:", error);
+      toast.error(error.message || "Google Sign-In failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -134,7 +149,7 @@ const AuthPage = () => {
               Join Your Campus Marketplace
             </h2>
             <p className="text-gray-500 text-sm">
-              Sign in with your college Google account to get started
+              Sign in with your VIT Google account to get started
             </p>
           </div>
 

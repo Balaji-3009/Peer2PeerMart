@@ -231,8 +231,6 @@ function WishlistContent({
     </Card>
   );
 }
-
-/* WishlistSection Component */
 function WishlistSection({
   title,
   items,
@@ -258,12 +256,13 @@ function WishlistSection({
             <div className="flex justify-between items-center">
               <div>
                 <p className="font-medium">{item.productName}</p>
-                <p className="text-gray-600">${item.price}</p>
+                <p className="text-gray-600">&#8377;{item.price}</p>
                 <p className="text-sm text-gray-500">
                   Seller: {item.sellerName}
                 </p>
               </div>
               <div className="flex space-x-2">
+                {/* Show cancel button only for active orders (status 0) */}
                 {item.confirmation === 0 && cancelProduct && (
                   <Button
                     variant="ghost"
@@ -273,13 +272,16 @@ function WishlistSection({
                     <XCircle className="h-5 w-5 text-red-500" />
                   </Button>
                 )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setChatItem && setChatItem(item)}
-                >
-                  <MessageCircle className="h-5 w-5 text-blue-500" />
-                </Button>
+                {/* Show chat icon only for active orders (status 0) */}
+                {item.confirmation === 0 && setChatItem && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setChatItem(item)}
+                  >
+                    <MessageCircle className="h-5 w-5 text-blue-500" />
+                  </Button>
+                )}
               </div>
             </div>
           </div>

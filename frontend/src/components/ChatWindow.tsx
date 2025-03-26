@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
-
-export default function ChatWindow({ item, onClose }) {
+interface ChatWindowProps {
+  item: any; // Replace 'any' with proper interface if available
+  onClose: () => void;
+}
+export default function ChatWindow({ item, onClose }: ChatWindowProps) {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [socket, setSocket] = useState(null);
@@ -69,7 +72,6 @@ export default function ChatWindow({ item, onClose }) {
           }
         );
         const data = await response.json();
-
         // Convert timestamps from UTC to IST
         const convertedMessages = data.map((msg) => ({
           ...msg,
@@ -154,12 +156,12 @@ export default function ChatWindow({ item, onClose }) {
         isVisible
           ? "translate-y-0 opacity-100 scale-100"
           : "translate-y-20 opacity-0 scale-95"
-      } bg-white border-l border-t border-gray-200 flex flex-col h-[80vh] md:h-[calc(100vh-4rem)] rounded-t-xl md:rounded-none`}
+      } bg-white border-l border-t border-gray-200 flex flex-col h-[85vh] md:h-[calc(100vh-4rem)] rounded-t-xl md:rounded-none`}
     >
       {/* Header */}
       <div className="bg-purple-600 text-white p-4 flex justify-between items-center rounded-t-xl md:rounded-none">
         <h2 className="text-lg font-semibold truncate">
-          Chat about {item.name}
+          Chat about {item.productName}
         </h2>
         <button
           onClick={handleClose}

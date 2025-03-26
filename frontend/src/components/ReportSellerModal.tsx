@@ -10,8 +10,16 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 import { toast } from "sonner";
-
-export default function ReportSellerModal({ isOpen, onClose, productId }) {
+interface ReportSellerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  productId: number;
+}
+export default function ReportSellerModal({
+  isOpen,
+  onClose,
+  productId,
+}: ReportSellerModalProps) {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
