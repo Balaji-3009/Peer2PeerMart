@@ -1,8 +1,8 @@
-"""initial migrations
+"""Initial migration
 
-Revision ID: d27cfa63ad6a
+Revision ID: e4caf5b5e63c
 Revises: 
-Create Date: 2025-03-24 17:34:03.684481
+Create Date: 2025-09-03 11:28:41.477866
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd27cfa63ad6a'
+revision: str = 'e4caf5b5e63c'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -49,6 +49,7 @@ def upgrade() -> None:
     sa.Column('regNo', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('pno', sa.String(), nullable=True),
+    sa.Column('banned', sa.Integer(), nullable=True),
     sa.Column('createdAt', sa.DateTime(), nullable=True),
     sa.Column('updatedAt', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['uuid'], ['entry.uuid'], ),
@@ -62,9 +63,20 @@ def upgrade() -> None:
     sa.Column('seller_id', sa.String(), nullable=True),
     sa.Column('product_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['buyer_id'], ['entry.uuid'], ),
-    sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
+    sa.ForeignKeyConstraint(['product_id'], ['products.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['seller_id'], ['entry.uuid'], ),
     sa.PrimaryKeyConstraint('chat_id')
+    )
+    op.create_table('reports',
+    sa.Column('report_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.String(), nullable=True),
+    sa.Column('product_id', sa.Integer(), nullable=True),
+    sa.Column('reason', sa.String(), nullable=True),
+    sa.Column('createdAt', sa.DateTime(), nullable=True),
+    sa.Column('updatedAt', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['product_id'], ['products.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['entry.uuid'], ),
+    sa.PrimaryKeyConstraint('report_id')
     )
     op.create_table('transactions',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -74,7 +86,7 @@ def upgrade() -> None:
     sa.Column('confirmation', sa.Integer(), nullable=True),
     sa.Column('createdAt', sa.DateTime(), nullable=True),
     sa.Column('updatedAt', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
+    sa.ForeignKeyConstraint(['product_id'], ['products.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['entry.uuid'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -85,7 +97,7 @@ def upgrade() -> None:
     sa.Column('sender_id', sa.String(), nullable=True),
     sa.Column('content', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['chat_id'], ['chats.chat_id'], ),
+    sa.ForeignKeyConstraint(['chat_id'], ['chats.chat_id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['sender_id'], ['entry.uuid'], ),
     sa.PrimaryKeyConstraint('message_id')
     )
@@ -97,6 +109,7 @@ def downgrade() -> None:
     op.drop_table('messages')
     op.drop_index(op.f('ix_transactions_id'), table_name='transactions')
     op.drop_table('transactions')
+    op.drop_table('reports')
     op.drop_table('chats')
     op.drop_index(op.f('ix_users_name'), table_name='users')
     op.drop_index(op.f('ix_users_id'), table_name='users')
