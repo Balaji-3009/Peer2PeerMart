@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
+import uvicorn
 import database.models
 from database.session import db_dependency, get_db
 from database.session import engine
@@ -71,3 +73,7 @@ async def verify_token(request: Request):
         return {"status": "Token is valid", "user": decoded_token}
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
+    
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)

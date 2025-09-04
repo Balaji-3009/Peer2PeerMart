@@ -17,13 +17,12 @@ def verify_firebase_token(id_token: str):
     try:
         decoded_token = auth.verify_id_token(id_token)
         email = decoded_token.get("email")
-        if not email.endswith("@vitstudent.ac.in"):
-            raise HTTPException(status_code=403, detail="Use VIT email to login")
-        loc = email.index('@')
-        current_datetime = datetime.now()
-        current_year = current_datetime.year
-        if int(email[loc-4:loc])<current_year - 5:
-            raise HTTPException(status_code=403, detail="Only current batch can login")
+        # if not email.endswith("@vitstudent.ac.in"):
+        #     raise HTTPException(status_code=403, detail="Use VIT email to login")
+        # loc = email.index('@')
+        # current_year = current_datetime.year
+        # if int(email[loc-4:loc])<current_year - 5:
+        #     raise HTTPException(status_code=403, detail="Only current batch can login")
         return decoded_token
     except Exception as e:
         raise ValueError(f"Invalid Firebase token: {e}")
