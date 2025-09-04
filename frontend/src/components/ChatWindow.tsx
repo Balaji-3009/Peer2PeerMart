@@ -87,9 +87,11 @@ export default function ChatWindow({ item, onClose }: ChatWindowProps) {
 
     let ws;
     const connectWebSocket = () => {
-      ws = new WebSocket(
-        `wss://peer2peermart-y0wq.onrender.com/chats/ws/${chatId}/${uuid}`
-      );
+      const wsProtocol = VITE_BACKEND_URL.startsWith("https") ? "wss" : "ws";
+      const wsUrl = `${wsProtocol}://${new URL(VITE_BACKEND_URL).host}/chats/ws/${chatId}/${uuid}`;
+
+      ws = new WebSocket(wsUrl);
+
       ws.onopen = () => console.log("Connected to WebSocket");
       ws.onmessage = (event) => {
         try {
