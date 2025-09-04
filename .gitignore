@@ -174,3 +174,4 @@ cython_debug/
 .pypirc
 
 p2pmart-11931-firebase-adminsdk-fbsvc-71918906cb.json
+frontend/node_modules/.vite/deps/_metadata.json
