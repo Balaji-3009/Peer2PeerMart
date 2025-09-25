@@ -32,6 +32,10 @@ jobs:
         docker build -t $IMAGE .
         echo $IMAGE >> image.txt
 
+    - name: Authenticate Docker with GCP
+      run: |
+        gcloud auth configure-docker
+
     - name: Push Docker image to Google Container Registry
       run: |
         IMAGE=$(cat image.txt)
