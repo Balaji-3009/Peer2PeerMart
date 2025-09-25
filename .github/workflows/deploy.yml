@@ -1,0 +1,48 @@
+name: CI/CD FastAPI to Cloud Run
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Configure GCP Project
+      run: |
+        gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+        gcloud config set run/region ${{ secrets.GCP_REGION }}
+
+    - name: Build Docker image
+      run: |
+        IMAGE=gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
+        docker build -t $IMAGE .
+        echo $IMAGE >> image.txt
+
+    - name: Push Docker image to Google Container Registry
+      run: |
+        IMAGE=$(cat image.txt)
+        docker push $IMAGE
+
+    - name: Deploy to Cloud Run
+      run: |
+        IMAGE=$(cat image.txt)
+        gcloud run deploy ${{ secrets.SERVICE_NAME }} \
+          --image $IMAGE \
+          --platform managed \
+          --region ${{ secrets.GCP_REGION }} \
+          --allow-unauthenticated \
+          --update-env-vars DATABASE_URL=${{ secrets.DB_URL }}
